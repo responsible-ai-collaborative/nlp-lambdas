@@ -48,7 +48,7 @@ Remaining Deliverables:
 ## Deploying the example application
 1.  Clone the project to your development environment:
     ```bash
-    git clone <https://github.com/olsonadr/zero-administration-inference-with-aws-lambda-for-hugging-face.git>
+    git clone <https://github.com/olsonadr/nlp-lambdas.git>
     ```
 
 2.  Download the ```pytorch_model.bin``` and ```incident_cls.pt``` files from the [current release](https://github.com/olsonadr/zero-administration-inference-with-aws-lambda-for-hugging-face/releases) of this repo and place them in the ```inference/model``` directory (this workflow will be replaced with LFS later, but public forks do not allow this at this time).
