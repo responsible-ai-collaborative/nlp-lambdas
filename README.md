@@ -14,7 +14,7 @@ Our solution (will) consist of two major segments:
  - A Python script using a pre-trained LongFormer model and PyTorch to aggregate mean CLS representations for each incident in the AIID database (not currently in a repo, see [Future Development](#Future-Development))
  - An [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (AWS CDK) script that automatically provisions container image-based Lambda functions that perform ML inference, also using the pre-trained Longformer model. This solution also includes [Amazon Elastic File System](https://aws.amazon.com/efs/) (EFS) storage that is attached to the Lambda functions to cache the pre-trained model and the CLS means of the current DB state that reduces inference latency.
 
-![AWS architecture diagram](serverless-hugging-face-aws-architecture.png)
+![AWS architecture diagram](aiid-nlp-lambdas-aws-architecture.png)
 
 In this architectural diagram:
  1. Serverless inference (specifically similar-incident resolution) is achieved by using AWS Lambda functions based on Docker container images. 
