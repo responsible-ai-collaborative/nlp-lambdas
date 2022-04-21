@@ -15,33 +15,69 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
         
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-west-2'
+        
+      - name: Install npm
+        run: sudo apt update -y && sudo apt install nodejs npm -y
+        
+      - name: Install cdk
+        run: sudo npm install -g aws-cdk
+      
+      - name: Install pip dependencies
+        run: pip install -r requirements.txt
+      
+      - name: cdk bootstrap
+        run: cdk bootstrap
+        
       - name: cdk diff
-        uses: youyo/aws-cdk-github-actions@v2.1.1
-        with:
-          cdk_subcommand: 'diff'
-          actions_comment: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-west-2'
-
+        run: cdk diff
+        
       - name: cdk synth
-        uses: youyo/aws-cdk-github-actions@v2.1.1
-        with:
-          cdk_subcommand: 'synth'
-          cdk_version: '1.16.2'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-west-2'
-
+        run: cdk synth
+      
       - name: cdk deploy
-        uses: youyo/aws-cdk-github-actions@v2.1.1
-        with:
-          cdk_subcommand: 'deploy'
-          cdk_args: '--require-approval never'
-          actions_comment: false
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-west-2'
+        run: cdk deploy --require-approval never
+
+# jobs:
+#   deploy_to_aws:
+#     runs-on: ubuntu-latest
+#     environment: aws_secrets
+#     steps:
+#       - name: Set up Git repository
+#         uses: actions/checkout@v2
+        
+#       - name: cdk diff
+#         uses: youyo/aws-cdk-github-actions@v2.1.1
+#         with:
+#           cdk_subcommand: 'diff'
+#           actions_comment: true
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_DEFAULT_REGION: 'us-west-2'
+
+#       - name: cdk synth
+#         uses: youyo/aws-cdk-github-actions@v2.1.1
+#         with:
+#           cdk_subcommand: 'synth'
+#           cdk_version: '1.16.2'
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_DEFAULT_REGION: 'us-west-2'
+
+#       - name: cdk deploy
+#         uses: youyo/aws-cdk-github-actions@v2.1.1
+#         with:
+#           cdk_subcommand: 'deploy'
+#           cdk_args: '--require-approval never'
+#           actions_comment: false
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_DEFAULT_REGION: 'us-west-2'
