@@ -10,6 +10,8 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
         
+      - run: pip install -r requirements.txt
+        
       - name: cdk diff
         uses: youyo/aws-cdk-github-actions@v2.1.1
         with:
