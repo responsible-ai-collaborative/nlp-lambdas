@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: aws_secrets
     steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+        
       - name: cdk diff
         uses: youyo/aws-cdk-github-actions@v2.1.1
         with:
