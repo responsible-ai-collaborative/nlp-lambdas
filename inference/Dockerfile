@@ -21,9 +21,12 @@ RUN mkdir -p ${FUNCTION_DIR}/
 # Copy handler function
 COPY *.py ${FUNCTION_DIR}/
 
-# Copy the model files
+# Copy the model files into the container
 ADD model ${FUNCTION_DIR}/model
 # COPY model/* ${FUNCTION_DIR}/model/*
+
+# Copy the db_state files into the container
+ADD db_state ${FUNCTION_DIR}/db_state
 
 # Install the function's dependencies
 RUN pip uninstall --yes jupyter

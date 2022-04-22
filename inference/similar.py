@@ -10,6 +10,7 @@ import torch
 from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
 
+
 def list_files(startpath):
     res = ""
     for root, dirs, files in os.walk(startpath):
@@ -50,17 +51,12 @@ model = LongformerModel.from_pretrained(
     '/function/model', local_files_only=True)
 tokenizer = LongformerTokenizer.from_pretrained(
     '/function/model', local_files_only=True)
-csv_path = '/function/model/incidents.csv'
-incidents_path = '/function/model/incident_cls.pt'
+csv_path = '/function/db_state/incidents.csv'
+incidents_path = '/function/db_state/state.csv'
 best_of_def = 3
 
 # Load in a list of articles from a CSV
-tensors = torch.load(incidents_path)
-# data = read_csv(csv_path)
-
-# Test effacacy of preprocessing and meaning whole output rather than
-# stripping CLS token. (Cursory: much more effective)
-
+df = pd.read_csv(filepath, converters={"mean": literal_eval})
 
 def test(text):
     inp = tokenizer(text,
@@ -69,28 +65,27 @@ def test(text):
                     return_tensors="pt")
     out = model(**inp)
     sims = [
-        torch.nn.functional.cosine_similarity(out.last_hidden_state[0][0],
-                                              tensors[i].mean(0),
-                                              dim=-1).item()
-        if tensors[i] != None else torch.zeros(1)
-        for i in range(len(tensors))
+        (torch.nn.functional.cosine_similarity(out.last_hidden_state[0][0],
+                                               torch.tensor(df.loc[i,"mean"]),
+                                               dim=-1).item(),
+         df.loc[i,"incident_id"],) for i in range(len(df))
     ]
     return sims
 
 
 def inputted(whole_text, best_of=best_of_def):
-    sims = [j for j in sorted(
-        zip(test(whole_text), range(1, len(tensors) + 1)), reverse=True)]
-
+    sims = [j for j in sorted(test(text), reverse=True)]
     if (best_of >= 0):
         return sims[:best_of]
     else:
         return sims
 
+
 # What to do to correctly formatted input event_text
 def process(event_text, best_of=best_of_def):
     # return tokenizer(event_text)
     return inputted(event_text, best_of)
+
 
 # Define lambda handler
 def handler(event, context):
@@ -125,7 +120,7 @@ def handler(event, context):
         best_of = json.loads(event['body'])['num']
     elif ('queryStringParameters' in event and 'num' in event['queryStringParameters']):
         best_of = event['queryStringParameters']['num']
-    
+
     # Assign to best of if possible
     try:
         if (best_of != best_of_def):  # if input found (type/value mismatch)
