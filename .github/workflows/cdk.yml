@@ -34,6 +34,8 @@ jobs:
       
       - name: cdk bootstrap
         run: cdk bootstrap
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         
       - name: cdk diff
         run: cdk diff
