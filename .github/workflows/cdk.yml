@@ -13,8 +13,8 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
         with:
-          submodules: true
-          lfs: true
+          submodules: 'recursive'
+          lfs: 'true'
         
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
