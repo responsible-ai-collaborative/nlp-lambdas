@@ -35,25 +35,25 @@ jobs:
         run: cdk bootstrap
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: 'us-west-2'
         
       - name: cdk diff
         run: cdk diff
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: 'us-west-2'
         
       - name: cdk synth
         run: cdk synth
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: 'us-west-2'
       
       - name: cdk deploy
         run: cdk deploy --require-approval never
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: 'us-west-2'
 
 # jobs:
 #   deploy_to_aws:
