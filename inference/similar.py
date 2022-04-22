@@ -9,6 +9,7 @@ import json
 import torch
 from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
+import pandas as pd
 
 
 def list_files(startpath):
