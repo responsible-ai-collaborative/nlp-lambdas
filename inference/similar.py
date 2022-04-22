@@ -4,6 +4,7 @@ SPDX-License-Identifier: MIT-0
 """
 
 # Imports
+from ast import literal_eval
 import os
 import json
 import torch
@@ -57,7 +58,7 @@ incidents_path = '/function/db_state/state.csv'
 best_of_def = 3
 
 # Load in a list of articles from a CSV
-df = pd.read_csv(filepath, converters={"mean": literal_eval})
+df = pd.read_csv(incidents_path, converters={"mean": literal_eval})
 
 def test(text):
     inp = tokenizer(text,
@@ -75,7 +76,7 @@ def test(text):
 
 
 def inputted(whole_text, best_of=best_of_def):
-    sims = [j for j in sorted(test(text), reverse=True)]
+    sims = [j for j in sorted(test(whole_text), reverse=True)]
     if (best_of >= 0):
         return sims[:best_of]
     else:

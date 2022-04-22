@@ -1,0 +1,3 @@
+# Ignore unnecessary large files in model dir
+model/rust_model.ot
+model/tf_model.h5
