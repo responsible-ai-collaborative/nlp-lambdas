@@ -1,0 +1,58 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy_to_aws:
+    runs-on: ubuntu-latest
+    environment: aws_secrets
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          lfs: 'true'
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-west-2'
+        
+      - name: Install npm
+        run: sudo apt update -y && sudo apt install nodejs npm -y
+        
+      - name: Install cdk
+        run: sudo npm install -g aws-cdk
+      
+      - name: Install pip dependencies
+        run: pip install -r requirements.txt
+      
+      - name: cdk bootstrap
+        run: cdk bootstrap
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+        
+      - name: cdk diff
+        run: cdk diff
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+        
+      - name: cdk synth
+        run: cdk synth
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+      
+      - name: cdk deploy
+        run: cdk deploy --require-approval never
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+          

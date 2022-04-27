@@ -1,0 +1,15 @@
+# Primary requirements
+aws-cdk-lib>=2.0.0
+constructs>=10.0.0,<11.0.0
+transformers
+python-dotenv
+unidecode
+pandas
+
+# Alpha AWS requirements
+aws-cdk.aws-apigatewayv2-alpha
+aws-cdk.aws-apigatewayv2-integrations-alpha
+
+# Torch nightly requirment
+--find-links https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+torch
