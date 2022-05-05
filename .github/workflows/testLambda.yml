@@ -1,0 +1,52 @@
+name: Lambda Testing
+
+on:
+  push:
+    branches:
+  workflow_dispatch:
+
+jobs:
+  lambda_testing:
+    runs-on: ubuntu-latest
+    environment: aws_secrets
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          lfs: 'true'
+
+      - name: Set Sam Enviroment
+      uses: aws-actions/setup-sam@v2
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-west-2'
+        
+      - name: Install npm
+        run: sudo apt update -y && sudo apt install nodejs npm -y
+        
+      - name: Install cdk
+        run: sudo npm install -g aws-cdk
+      
+      - name: Install pip dependencies
+        run: pip install -r requirements.txt
+      
+      - name: cdk bootstrap
+        run: cdk bootstrap
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+        
+      - name: cdk synth
+        run: cdk synth
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+
+      - name: Test Lambda
+        run : python ./tests/unit/testrun.py 1 ./docs/example_invoke_long.json
+      
