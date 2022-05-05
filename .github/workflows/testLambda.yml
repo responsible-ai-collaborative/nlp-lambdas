@@ -2,7 +2,6 @@ name: Lambda Testing
 
 on:
   push:
-    branches:
   workflow_dispatch:
 
 jobs:
@@ -17,7 +16,7 @@ jobs:
           lfs: 'true'
 
       - name: Set Sam Enviroment
-      uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v2
         
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
