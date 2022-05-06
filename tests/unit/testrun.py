@@ -34,9 +34,8 @@ def runTestPipeTest(expectIncident, docsJsonPath):
     cmd = ['sam', 'local', 'invoke','similar', '-t', '.\cdk.out\AiidNlpLambdaStack.template.json', '-e', docsJsonPath]
 
     # Spawn subprocess and wait for its complete stdout
-    with open("stderr.txt","wb") as err:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        stdout = p.communicate()[0]
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    stdout = p.communicate()[0]
 
     # Wait for completion
     while p.poll() == None: continue
