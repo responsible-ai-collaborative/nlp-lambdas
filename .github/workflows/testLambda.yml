@@ -48,6 +48,9 @@ jobs:
           
       - name: Check SAM Version
         run: sam --version
+          
+      - name: Build Project for SAM Testing
+        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json
 
       - name: List Files in Current Directory
         run: ls .
