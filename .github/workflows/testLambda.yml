@@ -50,7 +50,7 @@ jobs:
         run: sam --version
           
       - name: Build Project for SAM Testing
-        run: same build -t ./cdk.out/AiidNlpLambdaStack.template.json
+        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json
 
       - name: List Files in Current Directory
         run: ls .
