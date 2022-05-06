@@ -55,6 +55,9 @@ jobs:
       - name: List Files in cdk.out Directory
         run: ls ./cdk.out
 
-      - name: Test Lambda
+      - name: Test Lambda w/ Correct Excpected
         run: python ./tests/unit/testrun.py -i 1 -d ./docs/example_invoke_long.json --DefaultShell
+
+      # - name: Test Lambda w/ Incorrect Excpected
+      #   run: python ./tests/unit/testrun.py -i 2 -d ./docs/example_invoke_long.json --DefaultShell
       

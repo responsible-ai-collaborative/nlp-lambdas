@@ -2,6 +2,7 @@ import subprocess
 import json
 import ast
 import argparse
+import sys
 
 # inputs are expectIncident number and a .\docs .json file path
 def runTest(expectIncident, docsJson):
@@ -52,12 +53,11 @@ def runTestPipeTest(expectIncident, docsJsonPath):
 
     # Normal execution
     if (p.poll() == 0):
-        print(f'Stdout: "{stdout}"')
         data = {}
         try:
             data = json.loads(json.loads(stdout))
         except:
-            print('Failure in json parsing')
+            raise Exception('Failure in json parsing')
 
         try:
             if(data["statusCode"] == 200):
@@ -65,13 +65,11 @@ def runTestPipeTest(expectIncident, docsJsonPath):
                 bestID = listoftupals[0][1]
                 print(f'bestID output: {bestID}')
         except:
-            print('Error in reading SAM output, stderr: "{err}"')
+            raise Exception('Error in reading SAM output, stderr: "{err}"')
     else:
-        print(f'Error in SAM execution, exit code: {p.poll()}')
+        raise Exception(f'Error in SAM execution, exit code: {p.poll()}')
 
     return(expectIncident == bestID)
-
-defaultShell = False
 
 def main():
     # Use global defaultShell
@@ -90,7 +88,7 @@ def main():
     defaultShell = args.DefaultShell
 
     if args.ExpectIncidentNumber and args.DocsJson:
-        return runTestPipeTest(args.ExpectIncidentNumber, args.DocsJson)
+        sys.exit(not runTestPipeTest(args.ExpectIncidentNumber, args.DocsJson))
         # return runTest(args.ExpectIncidentNumber, args.DocsJson)
 
 if __name__ == "__main__":
