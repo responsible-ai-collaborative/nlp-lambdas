@@ -36,12 +36,15 @@ def runTestPipeTest(expectIncident, docsJsonPath):
     # Spawn subprocess and wait for its complete stdout (depending on DefaultShell argument)
     if (defaultShell):
         print(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(' '.join(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     else:
-        print((['bash', '-c']+cmd))
-        p = subprocess.Popen(' '.join(['bash', '-c']+cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        print((['bash', '-c', '\"']+cmd+['\"']))
+        p = subprocess.Popen(' '.join(['bash', '-c', '\"']+cmd+['\"']), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     
     stdout, err = p.communicate()
+
+    print(f'stdout: "{stdout}"')
+    print(f'stderr: "{err}"')
 
     # Wait for completion
     while p.poll() == None: continue
@@ -62,7 +65,7 @@ def runTestPipeTest(expectIncident, docsJsonPath):
                 bestID = listoftupals[0][1]
                 print(f'bestID output: {bestID}')
         except:
-            print('Error in reading SAM output')
+            print('Error in reading SAM output, stderr: "{err}"')
     else:
         print(f'Error in SAM execution, exit code: {p.poll()}')
 
