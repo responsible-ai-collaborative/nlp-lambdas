@@ -39,7 +39,7 @@ def runTestPipeTest(expectIncident, docsJsonPath):
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     else:
         print((['bash', '-c']+cmd))
-        p = subprocess.Popen((['bash', '-c']+cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        p = subprocess.Popen(' '.join(['bash', '-c']+cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     
     stdout, err = p.communicate()
 
