@@ -2,10 +2,10 @@
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
 """
-
-# Imports
-import os
+from ast import literal_eval
 import json
+import os
+import pandas as pd
 import torch
 from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
@@ -55,8 +55,9 @@ csv_path = '/function/db_state/incidents.csv'
 incidents_path = '/function/db_state/state.csv'
 best_of_def = 3
 
-# Load in a list of articles from a CSV
-df = pd.read_csv(filepath, converters={"mean": literal_eval})
+# Load in a list of incident states from a CSV
+state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
+
 
 def test(text):
     inp = tokenizer(text,
@@ -64,17 +65,16 @@ def test(text):
                     truncation="longest_first",
                     return_tensors="pt")
     out = model(**inp)
-    sims = [
-        (torch.nn.functional.cosine_similarity(out.last_hidden_state[0][0],
-                                               torch.tensor(df.loc[i,"mean"]),
-                                               dim=-1).item(),
-         df.loc[i,"incident_id"],) for i in range(len(df))
-    ]
+    sims = [(torch.nn.functional.cosine_similarity(
+                 out.last_hidden_state[0][0],
+                 torch.tensor(state.loc[i,"mean"]),
+                 dim=-1).item(),
+             state.loc[i,"incident_id"]) for i in range(len(state))]
     return sims
 
 
 def inputted(whole_text, best_of=best_of_def):
-    sims = [j for j in sorted(test(text), reverse=True)]
+    sims = [j for j in sorted(test(whole_text), reverse=True)]
     if (best_of >= 0):
         return sims[:best_of]
     else:
