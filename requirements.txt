@@ -5,6 +5,7 @@ transformers
 python-dotenv
 unidecode
 pandas
+requests
 
 # Alpha AWS requirements
 aws-cdk.aws-apigatewayv2-alpha

@@ -59,8 +59,8 @@ jobs:
         run: ls ./cdk.out
 
       - name: Test Lambda w/ Correct Excpected
-        run: python ./tests/unit/testrun.py -i 1 -d ./docs/example_invoke_long.json --DefaultShell
+        run: python ./tests/unit/testrun.py -i 1 -d ./docs/example_invoke_long.json
 
-      # - name: Test Lambda w/ Incorrect Excpected
-      #   run: python ./tests/unit/testrun.py -i 2 -d ./docs/example_invoke_long.json --DefaultShell
+      - name: Test Lambda w/ Correct Excpected
+        run: python ./tests/unit/testrun.py -i 15 -d ./docs/text15.json
       
