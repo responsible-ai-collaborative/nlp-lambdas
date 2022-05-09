@@ -62,5 +62,5 @@ jobs:
         run: python ./tests/unit/testrun.py -i 1 -d ./docs/example_invoke_long.json
 
       - name: Test Lambda w/ Correct Excpected
-        run: python ./tests/unit/testrun.py -i 15 -d ./docs/text15.json
+        run: python ./tests/testrun.py -i 15 -d ./docs/text15.json
       
