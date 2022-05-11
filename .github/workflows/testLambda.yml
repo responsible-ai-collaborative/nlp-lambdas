@@ -33,6 +33,9 @@ jobs:
       
       - name: Install pip dependencies
         run: pip install -r requirements.txt
+        
+      - name: Install pytest (add to dependencies later maybe)
+        run: pip install pytest
       
       - name: cdk bootstrap
         run: cdk bootstrap
@@ -57,10 +60,13 @@ jobs:
 
       - name: List Files in cdk.out Directory
         run: ls ./cdk.out
+        
+      - name: Run pytest
+        run: python -m pytest
 
-      - name: Test Lambda w/ Correct Excpected
+      - name: Directly Test Lambda w/ Correct Expected
         run: python ./tests/testrun.py -i 1 -d ./docs/example_invoke_long.json
 
-      - name: Test Lambda w/ Correct Excpected
+      - name: Directly Test Lambda w/ Correct Expected
         run: python ./tests/testrun.py -i 15 -d ./docs/example_test_data_15.json
       
