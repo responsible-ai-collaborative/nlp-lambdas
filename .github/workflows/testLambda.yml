@@ -65,11 +65,4 @@ jobs:
         run: python -m pytest
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: 'us-west-2'
-
-      - name: Directly Test Lambda w/ Correct Expected
-        run: python ./tests/testrun.py -i 1 -d ./docs/example_invoke_long.json
-
-      - name: Directly Test Lambda w/ Correct Expected
-        run: python ./tests/testrun.py -i 15 -d ./docs/example_test_data_15.json
-      
+          AWS_REGION: 'us-west-2'      
