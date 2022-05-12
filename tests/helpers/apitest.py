@@ -14,7 +14,7 @@ import psutil
 import atexit
 
 start_api_timeout = 60
-request_timeout = 20
+request_timeout = 180
 api_running = False
 p_list = []
 
