@@ -98,7 +98,8 @@ def start_api():
             elif "(Press CTRL+C to quit)" in str(line):
                 it.interrupt()
                 break
-
+        
+        api_running = True
         return p
 
     return None
