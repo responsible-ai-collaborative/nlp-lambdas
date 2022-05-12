@@ -139,16 +139,14 @@ def main():
     parser = argparse.ArgumentParser()
     
     # Adding optional argument
-    parser.add_argument("-i", "--ExpectIncidentNumber", type = int, help = "Give an Expect Incident Id number")
-    parser.add_argument("-d", "--DocsJson", help = "Give a .\docs .json file path")
+    parser.add_argument("-i", "--ExpectIncidentNumber", type = int, required = True, help = "Give an Expect Incident Id number")
+    parser.add_argument("-d", "--DocsJson", required = True, help = "Give a .\docs .json file path")
     
     # Read arguments from command lineW
     args = parser.parse_args()
 
     if args.ExpectIncidentNumber and args.DocsJson:
         sys.exit(not api_full_test_run(args.ExpectIncidentNumber, args.DocsJson))
-        # run_get_test_path(args.ExpectIncidentNumber, args.DocsJson)
-        # run_post_test_path(args.ExpectIncidentNumber, args.DocsJson)
 
 
 if __name__ == "__main__":

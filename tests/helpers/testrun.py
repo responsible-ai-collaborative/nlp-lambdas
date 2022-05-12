@@ -81,8 +81,8 @@ def main():
     parser = argparse.ArgumentParser()
     
     # Adding optional argument
-    parser.add_argument("-i", "--ExpectIncidentNumber", type = int, help = "Give an Expect Incident Id number")
-    parser.add_argument("-d", "--DocsJson", help = "Give a ./docs .json file path")
+    parser.add_argument("-i", "--ExpectIncidentNumber", type = int, required = True, help = "Give an Expect Incident Id number")
+    parser.add_argument("-d", "--DocsJson", required = True, help = "Give a ./docs .json file path")
     
     # Read arguments from command lineW
     args = parser.parse_args()
