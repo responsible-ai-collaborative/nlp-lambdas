@@ -74,6 +74,10 @@ def api_full_test_run(expectIncident, docsJsonPath):
         out, err = p.communicate()
         api_running = False
 
+    print(res_get)
+    print(res_post)
+    print(expectIncident)
+
     return(res_get == res_post == expectIncident)
     # return(res_get == expectIncident)
 
@@ -114,7 +118,6 @@ def run_get_test_fd(expectIncident, json_file):
     json_payload = json.load(json_file)
     get_payload = json_payload['text']
     get_url = ('http://127.0.0.1:3000/similar?text=\\"' + get_payload + '\\"')
-    # get_url = 'http://127.0.0.1:3000/similar?text=\\"'+"wow"+'\\"'
     print("before request")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")
@@ -147,7 +150,7 @@ def main():
     
     # Adding optional argument
     parser.add_argument("-i", "--ExpectIncidentNumber", type = int, required = True, help = "Give an Expect Incident Id number")
-    parser.add_argument("-d", "--DocsJson", required = True, help = "Give a .\docs .json file path")
+    parser.add_argument("-d", "--DocsJson", required = True, help = "Give a ./docs .json file path")
     
     # Read arguments from command lineW
     args = parser.parse_args()
