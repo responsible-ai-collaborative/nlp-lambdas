@@ -33,9 +33,6 @@ jobs:
       
       - name: Install pip dependencies
         run: pip install -r requirements.txt
-        
-      - name: Install pytest (add to dependencies later maybe)
-        run: pip install pytest pytest-dotenv
       
       - name: cdk bootstrap
         run: cdk bootstrap
@@ -60,9 +57,10 @@ jobs:
 
       - name: List Files in cdk.out Directory
         run: ls ./cdk.out
-        
-      - name: Run pytest
-        run: python -m pytest
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: 'us-west-2'      
+
+      - name: Test Lambda w/ Correct Excpected
+        run: python ./tests/testrun.py -i 1 -d ./docs/example_invoke_long.json
+
+      - name: Test Lambda w/ Correct Excpected
+        run: python ./tests/testrun.py -i 15 -d ./docs/example_test_data_15.json
+      

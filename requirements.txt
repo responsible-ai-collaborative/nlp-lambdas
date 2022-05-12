@@ -6,6 +6,8 @@ python-dotenv
 unidecode
 pandas
 requests
+iterators
+psutil
 
 # Alpha AWS requirements
 aws-cdk.aws-apigatewayv2-alpha
