@@ -74,12 +74,9 @@ def api_full_test_run(expectIncident, docsJsonPath):
         out, err = p.communicate()
         api_running = False
 
-    print(res_get)
-    print(res_post)
     print(expectIncident)
 
-    return(res_get == res_post == expectIncident)
-    # return(res_get == expectIncident)
+    return(res_get == res_post == True)
 
 def start_api():
     global api_running
