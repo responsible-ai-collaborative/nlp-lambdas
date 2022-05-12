@@ -29,6 +29,7 @@ def kill(proc_pid):
 @atexit.register
 def cleanup():
     global p_list
+    global api_running
     timeout_sec = 1
     p_sec = 0
     for p in p_list:
@@ -40,10 +41,12 @@ def cleanup():
             kill(p.pid)
             p.kill()
     p_list = []
+    api_running = False
 
 def api_full_test_run(expectIncident, docsJsonPath):
     # register global
     global p_list
+    global api_running
 
     # start the api
     p = start_api()
@@ -62,6 +65,7 @@ def api_full_test_run(expectIncident, docsJsonPath):
                 json_file.seek(0)
                 res_post = run_post_test_fd(expectIncident, json_file)
     except Exception as e:
+        api_running = False
         cleanup()
         raise e
 
@@ -92,10 +96,9 @@ def start_api():
                 it.interrupt()
                 break
 
-        # Mark api is running
-        api_running = True
-
-    return p
+        return p
+        
+    return None
 
 def run_get_test_path(expectIncident, docsJsonPath):
     with open(docsJsonPath, encoding="utf-8") as json_file:
