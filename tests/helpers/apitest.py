@@ -37,7 +37,7 @@ def cleanup():
             if p.poll() == None:
                 time.sleep(1)
                 p_sec += 1
-        if p_sec >= timeout_sec:
+        if p_sec >= timeout_sec and p:
             kill(p.pid)
             p.kill()
     p_list = []
@@ -69,7 +69,10 @@ def api_full_test_run(expectIncident, docsJsonPath):
         cleanup()
         raise e
 
-    if p: kill(p.pid); out, err = p.communicate()
+    if p:
+        kill(p.pid)
+        out, err = p.communicate()
+        api_running = False
 
     return(res_get == res_post == expectIncident)
     # return(res_get == expectIncident)
@@ -97,7 +100,7 @@ def start_api():
                 break
 
         return p
-        
+
     return None
 
 def run_get_test_path(expectIncident, docsJsonPath):
