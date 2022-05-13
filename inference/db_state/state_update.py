@@ -25,8 +25,13 @@ def cls_token(text):
 
 
 # Get the incident_id, count, and current mean from state.csv for each incident
-state = read_csv(STATE_DOC,
-                 converters={'mean': literal_eval}).set_index('incident_id')
+try:
+    state = read_csv(STATE_DOC,
+                    converters={'mean': literal_eval}).set_index('incident_id')
+except FileNotFoundError:
+    state = DataFrame({'incident_id': [],
+                       'count': [],
+                       'mean': []}).set_index('incident_id')
 
 # Aggregate the incident_id and text of all reports from Mongo for each incident
 client = MongoClient(MONGODB_URI)
@@ -59,7 +64,7 @@ for result in results:
         # print('added incident')
 
     # Process the text of new reports, and store new mean for each incident
-    count = state.loc[result['incident_id'], 'count']
+    count = int(state.loc[result['incident_id'], 'count'])
     for report in result['reports'][count:]:
         # print('adding report, count', count)
         token = cls_token(report['text'])
