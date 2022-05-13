@@ -1,8 +1,14 @@
 # AIID NLP Lambdas :hugs:
 
-The goal of this project is to support serverless correlation of input text to similar incidents in the existing [AI Incident Database](https://incidentdatabase.ai/). This project was founded by students at Oregon State University for their 2022 Senior Capstone project.
+The goal of this project is to support serverless correlation of input text to similar incidents in the existing [AI Incident Database](https://incidentdatabase.ai/). The software supports the following user stories,
 
-This solution uses the [LongFormer](https://huggingface.co/allenai/longformer-base-4096) model from [Hugging Face](https://huggingface.co/) as well as the Hugging Face Transformers python library over PyTorch to accomplish the ML inference. Hugging Face Transformers is a popular open-source project that provides pre-trained, natural language processing (NLP) models for a wide variety of use cases.
+* "I want to know if this candidate incident report is related to any incident reports currently in the database so I can avoid ingesting duplicate incidents"
+* "I want to know which incidents are semantically related to the current incident so I can browse incidents on the same theme"
+* "I want to know whether any news articles being published today are similar to incidents already in the database so I can monitor the world for new incidents"
+
+All these use cases are supported by taking vector embeddings of long text (i.e., reports) and finding the proximity of vectors.
+
+This solution applies the [LongFormer](https://huggingface.co/allenai/longformer-base-4096) vector embedding model from the Allen Institute as distributed by [Hugging Face](https://huggingface.co/). Hugging Face provides a PyTorch-based python library for the longformer model to run inference (i.e., the Transformers library). Hugging Face Transformers is a popular open-source project that provides pre-trained, natural language processing (NLP) models for a wide variety of use cases.
 
 Deployment of this project can be done locally or by using the included [GitHub Actions](#github-actions-for-cicd). Both require environment variables to be set, either in GitHub project secrets or using an enviroment variable file or manual variable setting, as described in the [Required Environment Variables](#required-environment-variables) section. If working locally, you will also need to manually configure your AWS credentials in the CDK CLI (discusssed in the [Prerequisites](#prerequisites) section).
 
@@ -10,32 +16,34 @@ The general architecture of this project was originally inspired by [this Amazon
 
 ## Solution Overview
 
-Our solution consists of two major segments:
- - A Python script using a pre-trained LongFormer model found in a [version-tagged git submodule](./inference/model) and PyTorch to aggregate mean CLS representations for each incident in the AIID database (currently in development, see [Future Development](#Future-Development))
+NLP-lambdas consists of two major segments:
+ - A Python script using a pre-trained LongFormer model found in a [version-tagged git submodule](./inference/model) and PyTorch to aggregate mean CLS representations for each incident in the AIID database (currently in development, see [Issues](https://github.com/responsible-ai-collaborative/nlp-lambdas/issues))
  - An [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (AWS CDK) script that automatically provisions container image-based Lambda functions that perform ML inference, also using the pre-trained Longformer model. This solution also includes [Amazon Elastic File System](https://aws.amazon.com/efs/) (EFS) storage that is attached to the Lambda functions to cache the pre-trained model and the CLS means of the current DB state that reduces inference latency.
 
 ![AWS architecture diagram](./docs/aiid-nlp-lambdas-aws-architecture.png)
 
 In this architectural diagram:
  1. Serverless inference (specifically similar-incident resolution) is achieved by using AWS Lambda functions based on Docker container images. 
- 2. Each Lambda's docker container contains a saved ```pytorch_model.bin``` file and the necessary configuration files for the a pre-trained LongFormer model, which is loaded from these files by the Lambda on the first execution after deployment, and subsequently cached (in EFS, bullet 5) to accelerate subsequent invocations of the Lambda.
+ 2. Each Lambda's docker container contains a saved ```pytorch_model.bin``` file and the necessary configuration files for the a pre-trained LongFormer model, which is loaded from these files by the Lambda on the first execution after deployment, and subsequently cached (in EFS, point 5) to accelerate subsequent invocations of the Lambda.
  3. Each Lambda's docker container also contains a pre-processed snapshot of the current state of the AIID database (in the ```incident_cls.pt``` PyTorch file) as a collection of mean CLS representations which are compared against the Longformer's output for the given input text using cosine_similarity to determine similar incidents. Once loaded on first Lambda execution, this representation of the DB state is cached similarly to the model itself (bullet 2).
  4. The container image for the Lambda is stored in an [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) (ECR) repository within your AWS account.
  5. The pre-trained Longformer model and AIID DB State are cached within Amazon Elastic File System storage in order to improve inference latency.
  6. An HTTP API is generated and hosted using AWS API Gateway to allow the Lambda(s) this project generates to be called by external users and/or future AIID applications. This is (currently) a publically accessible API that can exposes a route for each Lambda (for example, the lambda described in ```similar.py``` is given the route ```/similar```) upon which GET and POST requests can be made, providing input either using URL Query String Parameters (for GET requests) or the request body (for POST requests) as defined in the Lamda's implementation ```.py``` file.
 
 ## Prerequisites
-The following is required to run/deploy this project:
+The following languages and libraries are required to run/deploy this project, either from your local development/deployment environment or from the GitHub Workflow environment:
 -   [git](https://git-scm.com/)
 -   [AWS CDK v2](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
 -   [Python](https://www.python.org/) 3.6+
 -   [A virtual env](https://docs.python.org/3/library/venv.html#module-venv) (optional)
 
+These dependencies are automatically included in the GitHub Workflows.
+
 ## Required Environment Variables
 Deploying this project to the AWS cloud (or using the AWS CDK CLI for local development) requires several environment variables to be set for the target AWS environment to deploy to. These are required for local development as well as automatic deployment via the included GitHub Actions. 
 
 For local development, these variables can be set in a ```.env``` file (with ```dotenv``` installed) or directly (i.e. using ```export``` command). To use the included GitHub Actions for deployment and testing, (as owner of a fork of this repo) you should configure these secrets in GitHub's repo settings. 
-First you should create a new Enviroment (if it doesn't already exist) on the ```Settings >> Enviroments``` settings page, called ```aws_secrets```. Then, click on the newly created environment, and in the ```Environemtn secrets``` section, add a new secret for each of the following required variables:
+First you should create a new Enviroment (if it doesn't already exist) on the ```Settings >> Enviroments``` settings page, called ```aws_secrets```. Then, click on the newly created environment, and in the ```Environment secrets``` section, add a new secret for each of the following required variables:
  - ```AWS_ACCESS_KEY_ID```: an access key generated for your AWS root account or for an IAM user and role.
  - ```AWS_SECRET_ACCESS_KEY```: the secret-key pair of the AWS_ACCESS_KEY_ID described above.
  - ```AWS_ACCOUNT_ID```: the Account ID of the AWS account to deploy to (root account or towner of IAM user being used).
@@ -46,14 +54,6 @@ This [Amazon guide](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-t
 
 ## GitHub Actions for CI/CD
 This project includes a workflow designed to enable CI/CD deployment of the repo onto AWS servers. The [deployment workflow](./.github/workflows/cdk.yml) can be found in the [```.github/workflows``` directory](./.github/workflows). This project will soon include additional workflows for automated testing of lambdas, and more. 
-
-## Future Development
-Going forward we have created a list of features that still need to implemented, created, or integrated. These remaining features will ensure that this project will be easy to access, use, and expand upon.
-
-Major remaining deliverables:
-- Create Github Action to update database information used in CosineSimilarity Calculation
-- Create a fully-fledged and all-encompassing Test Suite
-- Create Github Action to trigger our Test Suite
 
 ## Manual/Local Deployment
 1.  Clone the project to your development environment:
@@ -239,6 +239,8 @@ After you are finished experimenting with this project, run ```cdk destroy``` to
 
 ## License
 This library is licensed under the MIT No Attribution License. See the [LICENSE](LICENSE) file.
+
+The license holders are the [Responsible AI Collaborative](https://incidentdatabase.ai/), and the project founders from a 2022 Senior Capstone group at Oregon State University.
 
 Disclaimer: Deploying the applications contained in this repository will potentially cause your AWS Account to be billed for services.
 
