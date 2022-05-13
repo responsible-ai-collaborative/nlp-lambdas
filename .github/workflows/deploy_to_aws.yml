@@ -15,7 +15,10 @@ jobs:
         with:
           submodules: 'recursive'
           lfs: 'true'
-        
+
+      - name: Set Sam Enviroment
+        uses: aws-actions/setup-sam@v2  
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -31,6 +34,9 @@ jobs:
       
       - name: Install pip dependencies
         run: pip install -r requirements.txt
+    
+      - name: Install pytest (add to dependencies later maybe)
+        run: pip install pytest pytest-dotenv
       
       - name: cdk bootstrap
         run: cdk bootstrap
@@ -49,7 +55,19 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
+
+      - name: Check SAM Version
+        run: sam --version
+          
+      - name: Build Project for SAM Testing
+        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json  
       
+      - name: Locally test Lambdas and API
+        run: python -m pytest
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'      
+
       - name: cdk deploy
         run: cdk deploy --require-approval never
         env:

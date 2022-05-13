@@ -514,3 +514,7 @@ yarn.lock
 .cdk.staging
 cdk.out
 .aws-sam/build.toml
+output.json
+stderr.txt
+stdout.json
+stdout.txt
