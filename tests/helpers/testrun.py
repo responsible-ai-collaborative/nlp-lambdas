@@ -20,7 +20,6 @@ def runTestPipeTest(expectIncident, docsJsonPath):
     p = subprocess.Popen(' '.join(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     
     stdout, err = p.communicate()
-    # time.sleep(15)
 
     print("stdout: ", json.loads(stdout))
     print("stderr: ", err)
@@ -64,7 +63,6 @@ def main():
 
     if args.ExpectIncidentNumber and args.DocsJson:
         sys.exit(not runTestPipeTest(args.ExpectIncidentNumber, args.DocsJson))
-        # return runTest(args.ExpectIncidentNumber, args.DocsJson)
 
 if __name__ == "__main__":
    main()

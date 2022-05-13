@@ -26,17 +26,10 @@ class LoopStopper:
         
         keep_going = True
         while keep_going:
-            print('\nwow')
             line = next(generator_expression, None)
-            print(line)
             if line is not None:
                 res = task(line)
                 if res == 0: keep_going = False
             elif self._loop_stop: raise exceptionOnFail
-
-        # for i in generator_expression:
-        #     res = task(i)
-        #     if res == 0: break
-        #     if self._loop_stop: raise exceptionOnFail
 
         t.cancel() # Cancel the timer if the loop ends ok. 
