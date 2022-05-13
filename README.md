@@ -1,5 +1,4 @@
 # AIID NLP Lambdas :hugs:
-
 The goal of this project is to support serverless correlation of input text to similar incidents in the existing [AI Incident Database](https://incidentdatabase.ai/). This project was founded by students at Oregon State University for their 2022 Senior Capstone project.
 
 This solution uses the [LongFormer](https://huggingface.co/allenai/longformer-base-4096) model from [Hugging Face](https://huggingface.co/) as well as the Hugging Face Transformers python library over PyTorch to accomplish the ML inference. Hugging Face Transformers is a popular open-source project that provides pre-trained, natural language processing (NLP) models for a wide variety of use cases.
@@ -9,7 +8,6 @@ Deployment of this project can be done locally or by using the included [GitHub 
 The general architecture of this project was originally inspired by [this Amazon-provided sample project](https://github.com/aws-samples/zero-administration-inference-with-aws-lambda-for-hugging-face).
 
 ## Solution Overview
-
 Our solution consists of two major segments:
  - A Python script using a pre-trained LongFormer model found in a [version-tagged git submodule](./inference/model) and PyTorch to aggregate mean CLS representations for each incident in the AIID database (currently in development, see [Future Development](#Future-Development))
  - An [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (AWS CDK) script that automatically provisions container image-based Lambda functions that perform ML inference, also using the pre-trained Longformer model. This solution also includes [Amazon Elastic File System](https://aws.amazon.com/efs/) (EFS) storage that is attached to the Lambda functions to cache the pre-trained model and the CLS means of the current DB state that reduces inference latency.
@@ -19,7 +17,7 @@ Our solution consists of two major segments:
 In this architectural diagram:
  1. Serverless inference (specifically similar-incident resolution) is achieved by using AWS Lambda functions based on Docker container images. 
  2. Each Lambda's docker container contains a saved ```pytorch_model.bin``` file and the necessary configuration files for the a pre-trained LongFormer model, which is loaded from these files by the Lambda on the first execution after deployment, and subsequently cached (in EFS, bullet 5) to accelerate subsequent invocations of the Lambda.
- 3. Each Lambda's docker container also contains a pre-processed snapshot of the current state of the AIID database (in the ```incident_cls.pt``` PyTorch file) as a collection of mean CLS representations which are compared against the Longformer's output for the given input text using cosine_similarity to determine similar incidents. Once loaded on first Lambda execution, this representation of the DB state is cached similarly to the model itself (bullet 2).
+ 3. Each Lambda's docker container also contains a pre-processed snapshot of the current state of the AIID database (in the ```state.csv``` file) as a collection of mean CLS representations which are compared against the Longformer's output for the given input text using cosine_similarity to determine similar incidents. Once loaded on first Lambda execution, this representation of the DB state is cached similarly to the model itself (bullet 2). The state representation may be updated by running ```state_update.py```, which fetches and processes new documents. This is performed automatically for deployment and testing workflows, after configuration and before bootstrapping.
  4. The container image for the Lambda is stored in an [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) (ECR) repository within your AWS account.
  5. The pre-trained Longformer model and AIID DB State are cached within Amazon Elastic File System storage in order to improve inference latency.
  6. An HTTP API is generated and hosted using AWS API Gateway to allow the Lambda(s) this project generates to be called by external users and/or future AIID applications. This is (currently) a publically accessible API that can exposes a route for each Lambda (for example, the lambda described in ```similar.py``` is given the route ```/similar```) upon which GET and POST requests can be made, providing input either using URL Query String Parameters (for GET requests) or the request body (for POST requests) as defined in the Lamda's implementation ```.py``` file.
@@ -48,21 +46,14 @@ This [Amazon guide](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-t
 ## GitHub Actions for CI/CD
 This project includes a workflow designed to enable CI/CD deployment of the repo onto AWS servers. The [deployment workflow](./.github/workflows/cdk.yml) can be found in the [```.github/workflows``` directory](./.github/workflows). This project runs a series of testing actions in it's Deployment workflow as well as any pushes and a pull request to main. This is done through local environment testing through AWS SAM and ensures that both the lambda and api configuration is correct. 
 
-## Future Development
-Going forward we have created a list of features that still need to implemented, created, or integrated. These remaining features will ensure that this project will be easy to access, use, and expand upon.
-
-Major remaining deliverables:
-- Create Github Action to update database information used in CosineSimilarity Calculation
-- Create a fully-fledged and all-encompassing Test Suite
-- Create Github Action to trigger our Test Suite
-
 ## Manual/Local Deployment
-1.  Clone the project to your development environment:
+1.  Clone the project to your development environment and navigate to the project directory:
     ```bash
     git clone <https://github.com/responsible-ai-collaborative/nlp-lambdas>
+    cd nlp-lambdas
     ```
 
-2.  Initialize and Update the HuggingFace Longerformer Model Submodule:
+2.  Initialize and update the HuggingFace Longerformer model submodule:
     ```bash
     git submodule init
     git submodule update
@@ -72,18 +63,21 @@ Major remaining deliverables:
    
 4. Configure AWS credentials for the CDK CLI (guide [here](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites)).
 
-5.  Install the required dependencies:
+5. Update the database state representation in ```state.csv```:
+    ```python ./inference/db_state/state_update.py```
+
+6.  Install the required dependencies:
     ```bash
     pip install -r requirements.txt
     ```
 
-6.  Bootstrap the CDK. This command provisions the initial resources
+7.  Bootstrap the CDK. This command provisions the initial resources
     needed by the CDK to perform deployments:
     ```bash
     cdk bootstrap
     ```
 
-7.  This command deploys the CDK application to its environment. During
+8.  This command deploys the CDK application to its environment. During
     the deployment, the toolkit outputs progress indications:
     ```bash
     cdk deploy
@@ -96,6 +90,7 @@ The code is organized using the following structure (only relevant files shown):
 │   ├── db_state
 │   │   ├── incidents.csv
 │   │   ├── state.csv
+|   |   └── state_update.py
 │   ├── model
 │   │   ├── config.json
 │   │   ├── merges.txt
