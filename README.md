@@ -90,7 +90,7 @@ The code is organized using the following structure (only relevant files shown):
 │   ├── db_state
 │   │   ├── incidents.csv
 │   │   ├── state.csv
-|   |   └── state_update.py
+│   │   └── state_update.py
 │   ├── model
 │   │   ├── config.json
 │   │   ├── merges.txt
