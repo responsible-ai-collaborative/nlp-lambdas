@@ -1,4 +1,4 @@
-from os import environ
+from os import ( environ, path )
 from ast import literal_eval
 from pandas import read_csv, DataFrame, concat, array
 from pymongo import MongoClient
@@ -6,7 +6,7 @@ from torch import tensor
 from transformers import LongformerTokenizer, LongformerModel
 
 
-STATE_DOC = 'inference/db_state/state.csv'
+STATE_DOC = path.join('inference', 'db_state', 'state.csv')
 MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
 
 # Get the Longformer tokenizer and model
