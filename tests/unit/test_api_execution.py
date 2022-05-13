@@ -15,7 +15,7 @@ def test_good_execution():
     assert apitest.api_full_test_run(15, mkpath("example_test_data_15.json"))
 
 def test_incorrect_value():
-    assert apitest.api_full_test_run(-5, mkpath("example_test_data_15.json"))
+    assert not apitest.api_full_test_run(-5, mkpath("example_test_data_15.json"))
 
 # Additional tests might include
 #   - checking that bestOf=N parameter correctly gives N results
