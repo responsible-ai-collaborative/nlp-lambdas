@@ -64,7 +64,9 @@ This project includes a workflow designed to enable CI/CD deployment of the repo
 4. Configure AWS credentials for the CDK CLI (guide [here](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites)).
 
 5. Update the database state representation in ```state.csv```:
-    ```python ./inference/db_state/state_update.py```
+    ```bash
+    python ./inference/db_state/state_update.py
+    ```
 
 6.  Install the required dependencies:
     ```bash
