@@ -1,14 +1,13 @@
-"""
-Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-SPDX-License-Identifier: MIT-0
-"""
+# Imports
 from ast import literal_eval
+import os
 import json
 import os
 import pandas as pd
 import torch
 from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
+import pandas as pd
 
 
 def list_files(startpath):
