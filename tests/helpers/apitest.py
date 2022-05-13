@@ -5,13 +5,11 @@ import json
 import argparse
 import time
 import sys
-from custom_exceptions import (StartApiTimeoutException)
-from loop_stopper import (LoopStopper)
 from iterators import TimeoutIterator
-import os
-import signal
 import psutil
 import atexit
+
+from .custom_exceptions import (StartApiTimeoutException)
 
 start_api_timeout = 60
 request_timeout = 180
@@ -93,7 +91,7 @@ def start_api():
             print(line)
             if line == it.get_sentinel():
                 kill(p.pid)
-                out, err = p.communicate()
+                _, _ = p.communicate()
                 it.interrupt()
                 raise StartApiTimeoutException
             elif "(Press CTRL+C to quit)" in str(line):
