@@ -1,11 +1,12 @@
-name: Lambda Testing
+name: Deploy to AWS
 
 on:
   push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  lambda_testing:
+  deploy_to_aws:
     runs-on: ubuntu-latest
     environment: aws_secrets
     steps:
@@ -16,8 +17,8 @@ jobs:
           lfs: 'true'
 
       - name: Set Sam Enviroment
-        uses: aws-actions/setup-sam@v2
-        
+        uses: aws-actions/setup-sam@v2  
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -33,7 +34,7 @@ jobs:
       
       - name: Install pip dependencies
         run: pip install -r requirements.txt
-      
+    
       - name: Install pytest (add to dependencies later maybe)
         run: pip install pytest pytest-dotenv
       
@@ -43,26 +44,33 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
         
+      - name: cdk diff
+        run: cdk diff
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+        
       - name: cdk synth
         run: cdk synth
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
-          
+
       - name: Check SAM Version
         run: sam --version
           
       - name: Build Project for SAM Testing
-        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json
-
-      - name: List Files in Current Directory
-        run: ls .
-
-      - name: List Files in cdk.out Directory
-        run: ls ./cdk.out
-        
-      - name: Run pytest
+        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json  
+      
+      - name: Locally test Lambdas and API
         run: python -m pytest
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'      
+
+      - name: cdk deploy
+        run: cdk deploy --require-approval never
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: 'us-west-2'
+          
