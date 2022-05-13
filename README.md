@@ -39,7 +39,8 @@ First you should create a new Enviroment (if it doesn't already exist) on the ``
  - ```AWS_ACCESS_KEY_ID```: an access key generated for your AWS root account or for an IAM user and role.
  - ```AWS_SECRET_ACCESS_KEY```: the secret-key pair of the AWS_ACCESS_KEY_ID described above.
  - ```AWS_ACCOUNT_ID```: the Account ID of the AWS account to deploy to (root account or towner of IAM user being used).
- - ```AWS_REGION```: the AWS server region to deploy the AWS application stack on (i.e. ```us-west-2```)
+ - ```AWS_REGION```: the AWS server region to deploy the AWS application stack on (i.e. ```us-west-2```).
+ - ```MONGODB_CONNECTION_STRING```: a read-enabled MONGODB connection string to allow the current database state to be read by ```inference/db_state/update_state.py``` to ensure the deployments are comparing to the most recent state of the database.
 
 ### Where to Find these AWS Credentials
 This [Amazon guide](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) talks through where to create access keys that comprise ```AWS_ACCESS_KEY_ID``` and ```AWS_SECRET_ACCESS_KEY```. The ```AWS_ACCOUNT_ID``` for a given AWS account can be found by logging into the [AWS Console](https://aws.amazon.com/), and clicking the usernmae in the top-right corner. The Account ID is (currently) the top value in the resulting dropdown list. The ```AWS_REGION``` variable must be one of the [regions supported by AWS](https://aws.amazon.com/about-aws/global-infrastructure/regions_az/). The specific format of this region string can be found by loggin into the [AWS Console](https://aws.amazon.com/), and clicking the region dropdown in the header (just left of the far-right user dropdown). This shows a list of the available regions, paired with the shorthand names required for this variable (i.e. ```us-west-2``` for the ```US West (Oregon)``` region).

@@ -2,20 +2,22 @@ from ast import literal_eval
 from pandas import read_csv
 import torch
 from transformers import LongformerTokenizer, LongformerModel
+from os import path
 
 
-# You will need to point these at the correct docs.
-DATA_DOC = "incidents.csv"
-STATE = "state.csv"
+# You will need to point these at the correct docs (assumed to be run from project root)
+DATA_DOC = path.join("inference", "db_state", "incidents.csv")
+STATE_DOC = path.join("inference", "db_state", "state.csv")
+MODEL_PATH = path.join("inference", "model")
+best_of = 1
 
 # Acquire pre trained tokenizer and model
-# TODO: move to local models.
-tokenizer = LongformerTokenizer.from_pretrained("allenai/longformer-base-4096")
-model = LongformerModel.from_pretrained("allenai/longformer-base-4096")
+tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
+model = LongformerModel.from_pretrained(MODEL_PATH, local_files_only=True)
 
 # Load in a list of articles from a CSV
 data = read_csv(DATA_DOC)
-state = read_csv(STATE, converters={'mean': literal_eval})
+state = read_csv(STATE_DOC, converters={'mean': literal_eval})
 
 
 # Process a single text and perform cosine similarity between its CLS token and

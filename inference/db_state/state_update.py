@@ -1,4 +1,9 @@
-from os import environ
+# state_update.py - updates (or generates) the adjacent state.csv with the current state of the AIID DB.
+# Requires:     the Longformer submodule is downloaded,
+#               environment variable MONGODB_CONNECTION_STRING set to read the database.
+# Assumes:      being executed from project root directory
+
+from os import ( environ, path )
 from ast import literal_eval
 from pandas import read_csv, DataFrame, concat, array
 from pymongo import MongoClient
@@ -6,13 +11,13 @@ from torch import tensor
 from transformers import LongformerTokenizer, LongformerModel
 
 
-STATE_DOC = 'inference/db_state/state.csv'
+STATE_DOC = path.join('inference', 'db_state', 'state.csv')
 MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
+MODEL_PATH = path.join('inference', 'model')
 
 # Get the Longformer tokenizer and model
-# TODO: Change to local model
-tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
-model = LongformerModel.from_pretrained('allenai/longformer-base-4096')
+tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
+model = LongformerModel.from_pretrained(MODEL_PATH, local_files_only=True)
 
 
 # Process the text of one report and return the CLS token

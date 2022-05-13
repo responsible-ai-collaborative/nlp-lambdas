@@ -38,6 +38,9 @@ jobs:
       - name: Install pytest (add to dependencies later maybe)
         run: pip install pytest pytest-dotenv
       
+      - name: Try to update DB State for this deployment
+        run: python ./inference/db_state/state_update.py
+
       - name: cdk bootstrap
         run: cdk bootstrap
         env:
