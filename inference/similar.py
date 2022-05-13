@@ -2,6 +2,8 @@
 from ast import literal_eval
 import os
 import json
+import os
+import pandas as pd
 import torch
 from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
@@ -52,8 +54,9 @@ csv_path = '/function/db_state/incidents.csv'
 incidents_path = '/function/db_state/state.csv'
 best_of_def = 3
 
-# Load in a list of articles from a CSV
-df = pd.read_csv(incidents_path, converters={"mean": literal_eval})
+# Load in a list of incident states from a CSV
+state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
+
 
 def test(text):
     inp = tokenizer(text,
@@ -61,12 +64,11 @@ def test(text):
                     truncation="longest_first",
                     return_tensors="pt")
     out = model(**inp)
-    sims = [
-        (torch.nn.functional.cosine_similarity(out.last_hidden_state[0][0],
-                                               torch.tensor(df.loc[i,"mean"]),
-                                               dim=-1).item(),
-         df.loc[i,"incident_id"],) for i in range(len(df))
-    ]
+    sims = [(torch.nn.functional.cosine_similarity(
+                 out.last_hidden_state[0][0],
+                 torch.tensor(state.loc[i,"mean"]),
+                 dim=-1).item(),
+             state.loc[i,"incident_id"]) for i in range(len(state))]
     return sims
 
 
