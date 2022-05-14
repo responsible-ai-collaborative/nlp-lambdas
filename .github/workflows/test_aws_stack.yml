@@ -41,7 +41,7 @@ jobs:
         run: pip install pytest pytest-dotenv
 
       - name: Try to update DB State for this test
-        run: python ./inference/db_state/state_update.py
+        run: python ./state_update.py
         env:
           MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
       
