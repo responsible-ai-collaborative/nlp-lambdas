@@ -36,7 +36,7 @@ For local development, these variables can be set in a ```.env``` file (with ```
 First you should create a new Enviroment (if it doesn't already exist) on the ```Settings >> Enviroments``` settings page, called ```aws_secrets```. Then, click on the newly created environment, and in the ```Environemnt secrets``` section, add a new secret for each of the following required variables:
  - ```AWS_ACCESS_KEY_ID```: an access key generated for your AWS root account or for an IAM user and role.
  - ```AWS_SECRET_ACCESS_KEY```: the secret-key pair of the AWS_ACCESS_KEY_ID described above.
- - ```AWS_ACCOUNT_ID```: the Account ID of the AWS account to deploy to (root account or towner of IAM user being used).
+ - ```AWS_ACCOUNT_ID```: the Account ID of the AWS account to deploy to (root account or owner of IAM user being used).
  - ```AWS_REGION```: the AWS server region to deploy the AWS application stack on (i.e. ```us-west-2```).
  - ```MONGODB_CONNECTION_STRING```: a read-enabled MONGODB connection string to allow the current database state to be read by ```inference/db_state/state_update.py``` to ensure the deployments are comparing to the most recent state of the database.
 
