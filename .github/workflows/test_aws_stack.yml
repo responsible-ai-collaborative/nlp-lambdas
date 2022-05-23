@@ -94,7 +94,7 @@ jobs:
           path: |
             ./cdk.out
             ./.aws-sam
-          key: ${{ runner.os }}-sam-build-${{ hashFiles('./cdk.out/*template*.json') }}-${{ hashFiles('./app.py') }}-${{ hashFiles('./inference/*') }}
+          key: ${{ runner.os }}-sam-build-${{ hashFiles('./cdk.out/*template*.json') }}-${{ hashFiles('./app.py') }}-${{ hashFiles('./inference/*.py') }}-${{ hashFiles('./inference/Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-sam-build-
       
