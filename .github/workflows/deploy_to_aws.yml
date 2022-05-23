@@ -95,8 +95,10 @@ jobs:
         id: cache-sam-build
         uses: actions/cache@v3
         with:
-          path: ./cdk.out
-          key: ${{ runner.os }}-sam-build-${{ hashFiles('./cdk.out/*template*.json') }}-${{ hashFiles('./inference/*') }}
+          path: |
+            ./cdk.out
+            ./.aws-sam
+          key: ${{ runner.os }}-sam-build-${{ hashFiles('./cdk.out/*template*.json') }}-${{ hashFiles('./app.py') }}-${{ hashFiles('./inference/*') }}
           restore-keys: |
             ${{ runner.os }}-sam-build-
       
