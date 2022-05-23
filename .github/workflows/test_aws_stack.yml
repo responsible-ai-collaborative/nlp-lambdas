@@ -40,10 +40,10 @@ jobs:
       - name: Install pytest (add to dependencies later maybe)
         run: pip install pytest pytest-dotenv
 
-      - name: Try to update DB State for this test
-        run: python ./state_update.py
-        env:
-          MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
+      # - name: Try to update DB State for this test
+      #   run: python ./state_update.py
+      #   env:
+      #     MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
       
       - name: cdk bootstrap
         run: cdk bootstrap

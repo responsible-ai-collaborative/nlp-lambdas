@@ -1,3 +1,5 @@
+# DO NOT MERGE THIS INTO MAIN UNTIL THE STATE UPDATING HAS BEEN RE-ENABLED IN GITHUB WORKFLOWS
+
 # AIID NLP Lambdas :hugs:
 The goal of this project is to support serverless correlation of input text to similar incidents in the existing [AI Incident Database](https://incidentdatabase.ai/). This project was founded by students at Oregon State University for their 2022 Senior Capstone project.
 
