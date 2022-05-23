@@ -92,7 +92,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./cdk.out
-          key: ${{ runner.os }}-sam-build-${{ hashFiles('**/*template.json') }}-${{ hashFiles('./inference/*') }}
+          key: ${{ runner.os }}-sam-build-${{ hashFiles('./cdk.out/*template*.json') }}-${{ hashFiles('./inference/*') }}
           restore-keys: |
             ${{ runner.os }}-sam-build-
       
