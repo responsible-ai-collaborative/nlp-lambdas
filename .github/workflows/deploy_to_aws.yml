@@ -28,53 +28,67 @@ jobs:
         
       - name: Install npm
         run: sudo apt update -y && sudo apt install nodejs npm -y
-        
+      
+      # Source: https://stackoverflow.com/a/62639424
+      - name: Use cached venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: ./.venv/
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      
+      - name: Build venv if not grabbed from cache
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: python -m venv ./.venv
+
       - name: Install cdk
-        run: sudo npm install -g aws-cdk
+        run: . ./.venv/bin/activate && sudo npm install -g aws-cdk
       
       - name: Install pip dependencies
-        run: pip install -r requirements.txt
+        run: . ./.venv/bin/activate && pip install -r requirements.txt
     
       - name: Install pytest (add to dependencies later maybe)
-        run: pip install pytest pytest-dotenv
+        run: . ./.venv/bin/activate && pip install pytest pytest-dotenv
       
       # - name: Try to update DB State for this deployment
-      #   run: python ./state_update.py
+      #   run: . ./.venv/bin/activate && python ./state_update.py
       #   env:
       #     MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
 
       - name: cdk bootstrap
-        run: cdk bootstrap
+        run: . ./.venv/bin/activate && cdk bootstrap
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
         
       - name: cdk diff
-        run: cdk diff
+        run: . ./.venv/bin/activate && cdk diff
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
         
       - name: cdk synth
-        run: cdk synth
+        run: . ./.venv/bin/activate && cdk synth
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
 
       - name: Check SAM Version
-        run: sam --version
+        run: . ./.venv/bin/activate && sam --version
           
       - name: Build Project for SAM Testing
-        run: sam build -t ./cdk.out/AiidNlpLambdaStack.template.json  
+        run: . ./.venv/bin/activate && sam build -t ./cdk.out/AiidNlpLambdaStack.template.json  
       
       - name: Locally test Lambdas and API
-        run: python -m pytest
+        run: . ./.venv/bin/activate && python -m pytest
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'      
 
       - name: cdk deploy
-        run: cdk deploy --require-approval never
+        run: . ./.venv/bin/activate && cdk deploy --require-approval never
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'
