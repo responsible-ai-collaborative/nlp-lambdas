@@ -44,9 +44,9 @@ def list_files(startpath):
 #     os.environ["TRANSFORMERS_CACHE"], os.environ["INCIDENTS_FILENAME"])
 # csv_path = os.path.join(
 #     os.environ["TRANSFORMERS_CACHE"], os.environ["CSV_FILENAME"])
-model = LongformerModel.from_pretrained(
+model = LongformerModel.from_pretrained(\
     '/function/model', local_files_only=True)
-tokenizer = LongformerTokenizer.from_pretrained(
+tokenizer = LongformerTokenizer.from_pretrained(\
     '/function/model', local_files_only=True)
 csv_path = '/function/db_state/incidents.csv'
 incidents_path = '/function/db_state/state.csv'
@@ -57,9 +57,9 @@ state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
 
 # Get longformer embedding
 def get_embedding(text:str):
-    inp = tokenizer(text,
-                    padding="longest",
-                    truncation="longest_first",
+    inp = tokenizer(text,\
+                    padding="longest",\
+                    truncation="longest_first",\
                     return_tensors="pt")
     return model(**inp)
 
@@ -71,9 +71,9 @@ def compute_cosine_sim_e_e(embed_1: torch.Tensor, embed_2: torch.Tensor):
 # Compute cosine similarity between a tensor and all embeddings in a db state DataFrame
 # Returns a list of tuples (cosine_sim, incident_id) for each incident in dataframe
 def compute_cosine_sim_e_df(embed: torch.Tensor, dataframe: pd.DataFrame):
-    return [(
-                compute_cosine_sim_e_e(embed, torch.tensor(dataframe.loc[i, "mean"])).item(),
-                dataframe.loc[i, "incident_id"]
+    return [(\
+                compute_cosine_sim_e_e(embed, torch.tensor(dataframe.loc[i, "mean"])).item(),\
+                dataframe.loc[i, "incident_id"]\
             ) for i in range(len(state))]
 
 # Process input text for text-to-db-similar computation
