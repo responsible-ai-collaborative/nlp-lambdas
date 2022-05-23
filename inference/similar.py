@@ -9,7 +9,6 @@ from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
 import pandas as pd
 
-
 def list_files(startpath):
     res = ""
     for root, dirs, files in os.walk(startpath):
@@ -20,7 +19,6 @@ def list_files(startpath):
         for f in files:
             res = res + ('{}{}'.format(subindent, f))
     return res
-
 
 # # Get model and tokenizer from EFS or download it to EFS
 # model_path = os.path.join(
@@ -56,7 +54,6 @@ best_of_def = 3
 
 # Load in a list of incident states from a CSV
 state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
-
 
 def test(text):
     inp = tokenizer(text,
