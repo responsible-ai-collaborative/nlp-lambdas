@@ -9,7 +9,6 @@ from transformers import LongformerTokenizer, LongformerModel
 from unidecode import unidecode
 import pandas as pd
 
-
 def list_files(startpath):
     res = ""
     for root, dirs, files in os.walk(startpath):
