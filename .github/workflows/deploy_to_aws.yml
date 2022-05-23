@@ -45,7 +45,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
-          # cache: 'npm'
+          cache: 'npm'
+
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://github.com/actions/setup-node/issues/317
+      - name: Workaround for setup-node no cache error
+        run: mkdir -p /home/runner/.npm
+        continue-on-error: true
 
       - name: Install cdk
         run: . ./.venv/bin/activate && sudo npm install -g aws-cdk
