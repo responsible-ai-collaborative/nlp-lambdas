@@ -20,7 +20,6 @@ def list_files(startpath):
             res = res + ('{}{}'.format(subindent, f))
     return res
 
-
 # # Get model and tokenizer from EFS or download it to EFS
 # model_path = os.path.join(
 #     os.environ["TRANSFORMERS_CACHE"], os.environ['MODEL_DIR'], os.environ["MODEL_FILENAME"])
