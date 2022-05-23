@@ -9,7 +9,6 @@ requests
 iterators
 psutil
 pymongo[srv]
-venv
 
 # Alpha AWS requirements
 aws-cdk.aws-apigatewayv2-alpha
