@@ -99,7 +99,7 @@ jobs:
             ${{ runner.os }}-sam-build-
       
       - name: Build project for SAM testing
-        # if: steps.cache-sam-build.outputs.cache-hit != 'true'
+        if: steps.cache-sam-build.outputs.cache-hit != 'true'
         run: . ./.venv/bin/activate && sam build -t ./cdk.out/AiidNlpLambdaStack.template.json --cached
         
       - name: Locally test Lambdas and API
