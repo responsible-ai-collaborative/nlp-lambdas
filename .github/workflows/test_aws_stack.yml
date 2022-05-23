@@ -17,6 +17,21 @@ jobs:
           submodules: 'recursive'
           lfs: 'true'
 
+      # Source: https://stackoverflow.com/a/62639424
+      # Key cache by requirements.txt files
+      - name: Use cached venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: ./.venv/
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      
+      - name: Build venv if not grabbed from cache
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: python -m venv ./.venv
+
       - name: Set Sam Enviroment
         uses: aws-actions/setup-sam@v2
         
@@ -33,22 +48,7 @@ jobs:
         with:
           node-version: 13 
           cache: 'npm'
-          cache-dependency-path: ./package-lock.json
-
-      # Source: https://stackoverflow.com/a/62639424
-      # Key cache by requirements.txt files
-      - name: Use cached venv
-        id: cache-venv
-        uses: actions/cache@v3
-        with:
-          path: ./.venv/
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
-      
-      - name: Build venv if not grabbed from cache
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-        run: python -m venv ./.venv
+          # cache-dependency-path: ./package-lock.json
         
       - name: Install cdk
         run: . ./.venv/bin/activate && sudo npm install -g aws-cdk
