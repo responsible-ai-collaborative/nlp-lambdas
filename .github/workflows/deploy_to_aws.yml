@@ -26,8 +26,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-west-2'
         
-      - name: Install npm
-        run: sudo apt update -y && sudo apt install nodejs npm -y
+      # Source: https://github.com/actions/setup-node
+      - name: Install node/npm with caching
+        uses: actions/setup-node@v3
+        with:
+          node-version: 13 
+          cache: 'npm'
+          cache-dependency-path: ./package-lock.json
       
       # Source: https://stackoverflow.com/a/62639424
       - name: Use cached venv
