@@ -112,7 +112,7 @@ def run_get_test_path(expectIncident, docsJsonPath):
 def run_get_test_fd(expectIncident, json_file):
     json_payload = json.load(json_file)
     get_payload = json_payload['text']
-    get_url = ('http://127.0.0.1:3000/similar?text=\\"' + get_payload + '\\"')
+    get_url = ('http://127.0.0.1:3000/text-to-db-similar?text=\\"' + get_payload + '\\"')
     print("before request")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")

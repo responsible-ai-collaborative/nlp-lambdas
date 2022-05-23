@@ -14,7 +14,7 @@ from .custom_exceptions \
 #   (runs w/o redirecting output and err to files)
 def runTestPipeTest(expectIncident, docsJsonPath):
     # Define command for subprocess
-    cmd = ['sam', 'local', 'invoke', 'similar', '-t', './cdk.out/AiidNlpLambdaStack.template.json', '-e', docsJsonPath]
+    cmd = ['sam', 'local', 'invoke', 'text-to-db-similar', '-t', './cdk.out/AiidNlpLambdaStack.template.json', '-e', docsJsonPath]
 
     # Spawn subprocess and wait for its complete stdout (depending on DefaultShell argument)
     p = subprocess.Popen(' '.join(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
