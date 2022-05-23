@@ -19,7 +19,7 @@ def test_stack_resource_creation():
     with open(expected_resources_json_path) as json_fp:
         # Initialize app and get template
         app = core.App()
-        stack = NlpLambdaStack(app, "AiidNlpStack")
+        stack = NlpLambdaStack(app, "AiidNlpLambdaStack")
         template = assertions.Template.from_stack(stack)
 
         # Get expected resources from json file
