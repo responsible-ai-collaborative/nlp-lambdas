@@ -57,7 +57,6 @@ best_of_def = 3
 # Load in a list of incident states from a CSV
 state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
 
-
 def test(text):
     inp = tokenizer(text,
                     padding="longest",
