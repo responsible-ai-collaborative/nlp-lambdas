@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
-          cache: 'npm'
+          # cache: 'npm'
 
       - name: Install cdk
         run: . ./.venv/bin/activate && sudo npm install -g aws-cdk
