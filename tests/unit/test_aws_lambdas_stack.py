@@ -8,7 +8,7 @@ import json
 from app import NlpLambdaStack
 
 # Constants
-expected_resources_json_path = os.path("testing_materials","expected_template.json")
+expected_resources_json_path = os.path.join("testing_materials","expected_template.json")
 
 # Test that all expected AWS resources are created, as described 
 #   in the `expected_resources_json_path` file
