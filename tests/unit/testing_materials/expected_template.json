@@ -143,14 +143,14 @@
     {
         "Type": "AWS::ApiGatewayV2::Route",
         "Properties": {
-            "RouteKey": "GET /similar",
+            "RouteKey": "GET /text-to-db-similar",
             "AuthorizationType": "NONE"
         }
     },
     {
         "Type": "AWS::ApiGatewayV2::Route",
         "Properties": {
-            "RouteKey": "POST /similar",
+            "RouteKey": "POST /text-to-db-similar",
             "AuthorizationType": "NONE"
         }
     },
@@ -172,7 +172,7 @@
             }],
             "ImageConfig": {
                 "Command": [
-                    "similar.handler"
+                    "text-to-db-similar.handler"
                 ]
             },
             "MemorySize": 8096,
