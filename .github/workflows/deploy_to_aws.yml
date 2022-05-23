@@ -46,7 +46,6 @@ jobs:
         with:
           node-version: 14
           cache: 'npm'
-          # cache-dependency-path: ./package-lock.json
 
       - name: Install cdk
         run: . ./.venv/bin/activate && sudo npm install -g aws-cdk
@@ -84,19 +83,19 @@ jobs:
         run: . ./.venv/bin/activate && sam --version
           
       # Source: https://stackoverflow.com/a/62639424
-      # Key cache by template.json outputs from cdk synth and contents of inference
-      #   (unchanged architecture/lambda definitions should hit)
-      # - name: Use cached SAM build
-      #   id: cache-sam-build
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ./.venv/
-      #     key: ${{ runner.os }}-sam-build-${{ hashFiles('**/template.json*.txt') }}-${{ hashFiles('./inference/*') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-sam-build-
+      Key cache by template.json outputs from cdk synth and contents of inference
+        (unchanged architecture/lambda definitions should hit)
+      - name: Use cached SAM build
+        id: cache-sam-build
+        uses: actions/cache@v3
+        with:
+          path: ./cdk.out
+          key: ${{ runner.os }}-sam-build-${{ hashFiles('**/template.json*.txt') }}-${{ hashFiles('./inference/*') }}
+          restore-keys: |
+            ${{ runner.os }}-sam-build-
       
       - name: Build project for SAM testing
-        # if: steps.cache-sam-build.outputs.cache-hit != 'true'
+        if: steps.cache-sam-build.outputs.cache-hit != 'true'
         run: . ./.venv/bin/activate && sam build -t ./cdk.out/AiidNlpLambdaStack.template.json
       
       - name: Locally test Lambdas and API
