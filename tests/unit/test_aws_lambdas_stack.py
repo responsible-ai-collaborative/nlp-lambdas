@@ -4,11 +4,14 @@ import aws_cdk.assertions as assertions
 import os.path
 import json
 
+# Local helper imports
+from test_api_execution import ( mkpath ) 
+
 # App stack import
 from app import NlpLambdaStack
 
 # Constants
-expected_resources_json_path = os.path.join("testing_materials","expected_template.json")
+expected_resources_json_path = mkpath("expected_template.json")
 
 # Test that all expected AWS resources are created, as described 
 #   in the `expected_resources_json_path` file
