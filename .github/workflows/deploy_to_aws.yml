@@ -83,8 +83,8 @@ jobs:
         run: . ./.venv/bin/activate && sam --version
           
       # Source: https://stackoverflow.com/a/62639424
-      Key cache by template.json outputs from cdk synth and contents of inference
-        (unchanged architecture/lambda definitions should hit)
+      # Key cache by template.json outputs from cdk synth and contents of inference
+      #   (unchanged architecture/lambda definitions should hit)
       - name: Use cached SAM build
         id: cache-sam-build
         uses: actions/cache@v3
