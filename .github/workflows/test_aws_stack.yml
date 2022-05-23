@@ -2,8 +2,7 @@ name: Lambda Testing
 
 on:
   pull_request:
-    branches: 
-      - main
+    branches: [ main, dev-main ]
   push:
   workflow_dispatch:
 
