@@ -69,11 +69,11 @@ jobs:
       #   env:
       #     MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
       
-      - name: cdk bootstrap
-        run: . ./.venv/bin/activate && cdk bootstrap
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: 'us-west-2'
+      # - name: cdk bootstrap
+      #   run: . ./.venv/bin/activate && cdk bootstrap
+      #   env:
+      #     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      #     AWS_REGION: 'us-west-2'
         
       - name: cdk synth
         run: . ./.venv/bin/activate && cdk synth
