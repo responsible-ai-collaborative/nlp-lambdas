@@ -61,7 +61,7 @@ def get_embedding(text:str):
                     padding="longest",\
                     truncation="longest_first",\
                     return_tensors="pt")
-    return model(**inp)
+    return model(**inp).last_hidden_state[0][0]
 
 # Compute cosine similarity between two tensors
 # Returns a single value of the cosine_sim
