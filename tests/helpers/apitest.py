@@ -11,6 +11,8 @@ import atexit
 
 from .custom_exceptions import (StartApiTimeoutException)
 
+# TODO: refactor to use helpers rather than repeating code
+
 start_api_timeout = 60
 request_timeout = 180
 api_running = False
@@ -41,7 +43,7 @@ def cleanup():
     p_list = []
     api_running = False
 
-def api_full_test_run(expectIncident, docsJsonPath):
+def run_text_to_db_similar_api_tests(expectIncident, docsJsonPath):
     # register global
     global p_list
     global api_running
@@ -59,9 +61,9 @@ def api_full_test_run(expectIncident, docsJsonPath):
         if api_running:
             # Open the provided json input and run a get and post request
             with open(docsJsonPath, encoding="utf-8") as json_file:
-                res_get = run_get_test_fd(expectIncident, json_file)
+                res_get = run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-to-db-similar")
                 json_file.seek(0)
-                res_post = run_post_test_fd(expectIncident, json_file)
+                res_post = run_post_test_fd(expectIncident, json_file, route="/text-to-db-similar")
     except Exception as e:
         api_running = False
         cleanup()
@@ -72,7 +74,38 @@ def api_full_test_run(expectIncident, docsJsonPath):
         out, err = p.communicate()
         api_running = False
 
-    print(expectIncident)
+    return(res_get == res_post == True)
+
+def run_embed_to_db_similar_api_tests(expectIncident, docsJsonPath):
+    # register global
+    global p_list
+    global api_running
+
+    # start the api
+    p = start_api()
+    p_list.append(p)
+
+    # initial, failing values
+    res_get = -1
+    res_post = -2
+
+    # try to make test requests
+    try:
+        if api_running:
+            # Open the provided json input and run a get and post request
+            with open(docsJsonPath, encoding="utf-8") as json_file:
+                res_get = run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/embed-to-db-similar")
+                json_file.seek(0)
+                res_post = run_post_test_fd(expectIncident, json_file, route="/embed-to-db-similar")
+    except Exception as e:
+        api_running = False
+        cleanup()
+        raise e
+
+    if p:
+        kill(p.pid)
+        out, err = p.communicate()
+        api_running = False
 
     return(res_get == res_post == True)
 
@@ -103,16 +136,15 @@ def start_api():
 
     return None
 
-def run_get_test_path(expectIncident, docsJsonPath):
+def run_get_test_path(expectIncident, docsJsonPath, payloadKey="text", route="/text-to-db-similar"):
     with open(docsJsonPath, encoding="utf-8") as json_file:
-        return run_get_test_fd(expectIncident, json_file)
-
+        return run_get_test_fd(expectIncident, json_file, payloadKey, route)
     return False
 
-def run_get_test_fd(expectIncident, json_file):
+def run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-to-db-similar"):
     json_payload = json.load(json_file)
-    get_payload = json_payload['text']
-    get_url = ('http://127.0.0.1:3000/text-to-db-similar?text=\\"' + get_payload + '\\"')
+    get_payload = json_payload[payloadKey]
+    get_url = (f'http://127.0.0.1:3000{route}?{payloadKey}=\\"{get_payload}\\"')
     print("before request")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")
@@ -122,16 +154,15 @@ def run_get_test_fd(expectIncident, json_file):
 
     return (getOutputIncident == expectIncident)
 
-def run_post_test_path(expectIncident, docsJsonPath):
+def run_post_test_path(expectIncident, docsJsonPath, route="/text-to-db-similar"):
     with open(docsJsonPath, encoding="utf-8") as json_file:
-        return run_post_test_fd(expectIncident, json_file)
-
+        return run_post_test_fd(expectIncident, json_file, route)
     return False
 
-def run_post_test_fd(expectIncident, json_file):
+def run_post_test_fd(expectIncident, json_file, route="/text-to-db-similar"):
     json_payload = json.load(json_file)
     # print(f"req: {json_payload}")
-    res = requests.post("http://127.0.0.1:3000/similar", json=json_payload, timeout=request_timeout)
+    res = requests.post(f"http://127.0.0.1:3000{route}", json=json_payload, timeout=request_timeout)
     print(f"res = {res}")
     print(res.json())
     postOutputIncident = ast.literal_eval(json.loads(res.text)['body']['msg'])[0][1]
@@ -151,7 +182,7 @@ def main():
     args = parser.parse_args()
 
     if args.ExpectIncidentNumber and args.DocsJson:
-        sys.exit(not api_full_test_run(args.ExpectIncidentNumber, args.DocsJson))
+        sys.exit(not run_text_to_db_similar_api_tests(args.ExpectIncidentNumber, args.DocsJson))
 
 
 if __name__ == "__main__":

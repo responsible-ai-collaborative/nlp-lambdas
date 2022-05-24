@@ -16,21 +16,37 @@ def mkpath(json_filename: str):
                         *json_dir_from_project_root,
                         json_filename)
 
-def test_good_execution():
+def test_good_text_to_db_similar_execution():
     assert testrun.run_text_to_db_similar_tests(1, mkpath("lambda_test_request_incident_1.json"))
     assert testrun.run_text_to_db_similar_tests(15, mkpath("lamdba_test_request_incident_15.json"))
     assert testrun.run_text_to_db_similar_tests(10, mkpath("lamdba_test_request_incident_10.json"))
+    
+def test_good_embed_to_db_similar_execution():
+    assert testrun.run_embed_to_db_similar_tests(1, mkpath("lambda_test_request_incident_1_embedding.json"))
+    assert testrun.run_embed_to_db_similar_tests(15, mkpath("lamdba_test_request_incident_15_embedding.json"))
+    assert testrun.run_embed_to_db_similar_tests(10, mkpath("lamdba_test_request_incident_10_embedding.json"))
 
-def test_incorrect_value():
+def test_incorrect_text_to_db_similar_value():
     assert not testrun.run_text_to_db_similar_tests(-5, mkpath("lamdba_test_request_incident_15.json"))
 
-def test_json_input_syntax_error():
+def test_incorrect_embed_to_db_similar_value():
+    assert not testrun.run_embed_to_db_similar_tests(-5, mkpath("lamdba_test_request_incident_15_embedding.json"))
+
+def test_json_input_syntax_error_text_to_db_similar_():
     with pytest.raises(JsonException):
         testrun.run_text_to_db_similar_tests(1, mkpath("lamdba_bad_test_request_bad_syntax.json"))
 
-def test_missing_required_input_field():
+def test_json_input_syntax_error_embed_to_db_similar_():
+    with pytest.raises(JsonException):
+        testrun.run_embed_to_db_similar_tests(1, mkpath("lamdba_bad_test_request_bad_syntax.json"))
+
+def test_missing_required_input_field_text_to_db_similar_():
     with pytest.raises(SamOutputException):
         testrun.run_text_to_db_similar_tests(1, mkpath("lamdba_bad_test_request_missing_input.json"))
+        
+def test_missing_required_input_field_embed_to_db_similar_():
+    with pytest.raises(SamOutputException):
+        testrun.run_embed_to_db_similar_tests(1, mkpath("lamdba_bad_test_request_missing_input.json"))
 
 # Additional tests might include
 #   - checking that bestOf=N parameter correctly gives N results

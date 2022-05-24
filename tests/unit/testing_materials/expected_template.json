@@ -179,5 +179,45 @@
             "PackageType": "Image",
             "Timeout": 600
         }
+    },
+    {
+        "Type": "AWS::ApiGatewayV2::Route",
+        "Properties": {
+            "RouteKey": "GET /embed-to-db-similar",
+            "AuthorizationType": "NONE"
+        }
+    },
+    {
+        "Type": "AWS::ApiGatewayV2::Route",
+        "Properties": {
+            "RouteKey": "POST /embed-to-db-similar",
+            "AuthorizationType": "NONE"
+        }
+    },
+    {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+            "Environment": {
+                "Variables": {
+                    "TRANSFORMERS_CACHE": "/mnt/hf_models_cache",
+                    "MODEL_DIR": "model",
+                    "MODEL_FILENAME": "pytorch_model.bin",
+                    "INCIDENTS_FILENAME": "incident_cls.pt",
+                    "CSV_FILENAME": "incidents.csv",
+                    "HF_MODEL_URI": "allenai/longformer-base-4096"
+                }
+            },
+            "FileSystemConfigs": [{
+                "LocalMountPath": "/mnt/hf_models_cache"
+            }],
+            "ImageConfig": {
+                "Command": [
+                    "embed-to-db-similar.handler"
+                ]
+            },
+            "MemorySize": 8096,
+            "PackageType": "Image",
+            "Timeout": 600
+        }
     }
 ]
