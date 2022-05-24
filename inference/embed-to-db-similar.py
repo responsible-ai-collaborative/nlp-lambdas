@@ -131,15 +131,21 @@ def handler(event, context):
     }
 
     # Get input from body or query string
-    if ('embed' in event):
-        embed_text = event['embed']
-    elif ('body' in event and event['body'] != '' and 'embed' in json.loads(event['body'])):
-        embed_text = json.loads(event['body'])['embed']
-    elif ('queryStringParameters' in event and 'embed' in event['queryStringParameters']):
-        embed_text = event['queryStringParameters']['embed']
-    else:
+    try:
+        if ('embed' in event):
+            embed_text = event['embed']
+        elif ('body' in event and event['body'] != '' and 'embed' in json.loads(event['body'])):
+            embed_text = json.loads(event['body'])['embed']
+        elif ('queryStringParameters' in event and 'embed' in event['queryStringParameters']):
+            embed_text = event['queryStringParameters']['embed']
+        else:
+            result['statusCode'] = 500
+            result['body'] = {'msg': 'Error! Valid input text not provided!'}
+            result['headers']['Content-Type'] = "application/json"
+            return json.dumps(result)
+    except:
         result['statusCode'] = 500
-        result['body'] = {'msg': 'Error! Valid input text not provided!'}
+        result['body'] = {'msg': 'Error! Parsing input gave exception!'}
         result['headers']['Content-Type'] = "application/json"
         return json.dumps(result)
 
