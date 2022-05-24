@@ -102,6 +102,9 @@ jobs:
         # if: steps.cache-sam-build.outputs.cache-hit != 'true'
         run: . ./.venv/bin/activate && sam build -t ./cdk.out/AiidNlpLambdaStack.template.json --cached
         
+      - name: Install and use tree to list files
+        run: sudo apt-get install tree && tree
+
       - name: Locally test Lambdas and API
         run: . ./.venv/bin/activate && python -m pytest
         env:

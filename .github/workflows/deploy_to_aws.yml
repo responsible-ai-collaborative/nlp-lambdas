@@ -112,6 +112,9 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'      
 
+      - name: Install and use tree to list files
+        run: sudo apt-get install tree && tree
+
       - name: cdk deploy
         run: . ./.venv/bin/activate && cdk deploy --require-approval never
         env:
