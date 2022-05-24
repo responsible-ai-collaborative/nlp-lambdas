@@ -24,7 +24,7 @@ def test_incorrect_text_to_db_similar_value():
     assert not apitest.run_api_tests(-5, mkpath("lambda_test_request_incident_15.json"), payloadKey="text", route="/text-to-db-similar")
 
 def test_incorrect_embed_to_db_similar_value():
-    assert not apitest.run_api_tests(-5, mkpath("lambda_test_request_incident_15.json"), payloadKey="embed", route="/embed-to-db-similar")
+    assert not apitest.run_api_tests(-5, mkpath("lambda_test_request_incident_15_embedding.json"), payloadKey="embed", route="/embed-to-db-similar")
 
 # Additional tests might include
 #   - checking that bestOf=N parameter correctly gives N results
