@@ -17,8 +17,7 @@ jobs:
           submodules: 'recursive'
           lfs: 'true'
 
-      - name: Get CWD
-        run: cwd
+      - run: pwd
               
       - name: Install and use tree to list files
         run: sudo apt-get install tree && tree
