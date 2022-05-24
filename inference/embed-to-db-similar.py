@@ -171,14 +171,14 @@ def handler(event, context):
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
     # Handle unicode in event_text and parse it to a list
-    embed:list = literal_eval(unidecode(embed_text))
-    # try:
-    #     embed:list = literal_eval(unidecode(embed_text))
-    # except:
-    #     result['statusCode'] = 500
-    #     result['body'] = {'msg': 'Error during literal evaluation of embed_text!'}
-    #     result['headers']['Content-Type'] = "application/json"
-    #     return json.dumps(result)
+    # embed:list = literal_eval(unidecode(embed_text))
+    try:
+        embed:list = literal_eval(unidecode(embed_text))
+    except:
+        result['statusCode'] = 500
+        result['body'] = {'msg': 'Error during literal evaluation of embed_text!'}
+        result['headers']['Content-Type'] = "application/json"
+        return json.dumps(result)
 
     # Found event_text, use it and return result
     try:
