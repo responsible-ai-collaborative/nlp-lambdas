@@ -9,7 +9,7 @@ from iterators import TimeoutIterator
 import psutil
 import atexit
 
-from .custom_exceptions import (StartApiTimeoutException)
+from .custom_exceptions import (InternalServerException, StartApiTimeoutException)
 
 start_api_timeout = 60
 request_timeout = 180
@@ -109,16 +109,34 @@ def run_get_test_path(expectIncident, docsJsonPath, payloadKey="text", route="/t
 def run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-to-db-similar"):
     json_payload = json.load(json_file)
     get_payload = json_payload[payloadKey]
-    get_url = (f'http://127.0.0.1:3000{route}?{payloadKey}=\\"{get_payload}\\"')
+    get_url = (f'http://127.0.0.1:3000{route}?{payloadKey}="{get_payload}"')
     get_url_shortened = get_url if len(get_url)<100 else f'{get_url[:90]} ... {get_url[-10:]}'
     print(f"before request, req_url = {get_url_shortened}")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")
     print(res.json())
-    getOutputIncident = ast.literal_eval(json.loads(res.text)['body']['msg'])[0][1]
-    print(getOutputIncident)
 
-    return (getOutputIncident == expectIncident)
+    # Parse json response
+    res_json = json.loads(res.text)
+
+    # Check for success
+    if 'body' not in res_json:
+        # Internal server error :(
+        print("Lambda handler had unexpected runtime error, resulting in a \"Internal Server Error\" response from the API")
+        raise InternalServerException
+    elif 'statusCode' not in res_json:
+        # Unkown error
+        print("Unknown error, but statusCode was not given back in response")
+        raise Exception
+    elif res_json['statusCode'] != 200:
+        # Handled error in lambda execution
+        print(f"Lambda handler had expected runtime error {res_json['statusCode']} w/ body \"{res_json['body']['msg']}\"")
+        raise InternalServerException
+    else:
+        # Successful! Get output and return if correct.
+        getOutputIncident = ast.literal_eval(res_json['body']['msg'])[0][1]
+        print(getOutputIncident)
+        return (getOutputIncident == expectIncident)
 
 def run_post_test_path(expectIncident, docsJsonPath, route="/text-to-db-similar"):
     with open(docsJsonPath, encoding="utf-8") as json_file:
@@ -131,10 +149,29 @@ def run_post_test_fd(expectIncident, json_file, route="/text-to-db-similar"):
     res = requests.post(f"http://127.0.0.1:3000{route}", json=json_payload, timeout=request_timeout)
     print(f"res = {res}")
     print(res.json())
-    postOutputIncident = ast.literal_eval(json.loads(res.text)['body']['msg'])[0][1]
-    print(postOutputIncident)
 
-    return(postOutputIncident == expectIncident)
+    # Parse json response
+    res_json = json.loads(res.text)
+
+    # Check for success
+    if 'body' not in res_json:
+        # Internal server error :(
+        print("Lambda handler had unexpected runtime error, resulting in a \"Internal Server Error\" response from the API")
+        raise InternalServerException
+    elif 'statusCode' not in res_json:
+        # Unkown error
+        print("Unknown error, but statusCode was not given back in response")
+        raise Exception
+    elif res_json['statusCode'] != 200:
+        # Handled error in lambda execution
+        print(f"Lambda handler had expected runtime error {res_json['statusCode']} w/ body \"{res_json['body']['msg']}\"")
+        raise InternalServerException
+    else:
+        # Successful! Get output and return if correct.
+        postOutputIncident = ast.literal_eval(json.loads(res.text)['body']['msg'])[0][1]
+        print(postOutputIncident)
+        return (postOutputIncident == expectIncident)
+
 
 def main():
      # Initialize parser

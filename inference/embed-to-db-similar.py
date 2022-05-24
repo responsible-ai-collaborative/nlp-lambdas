@@ -170,10 +170,16 @@ def handler(event, context):
         result['body']['warnings'].append(
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
-    # Handle unicode in event_text and parse it to a list
+    # Handle unicode in event_text and parse it to a list (removing up to 10 levels of nested quotes, just in case)
     # embed:list = literal_eval(unidecode(embed_text))
     try:
-        embed:list = literal_eval(unidecode(embed_text))
+        embed = unidecode(embed_text); count=0; count_max=10
+        while type(embed) != list:
+            # Check if we've tried too many times and give up if so
+            count = count + 1
+            if (count > count_max): raise Exception
+            # Try to evaluate embed_text to a list literal
+            embed:list = literal_eval(embed)
     except:
         result['statusCode'] = 500
         result['body'] = {'msg': 'Error during literal evaluation of embed_text!'}
@@ -182,6 +188,7 @@ def handler(event, context):
 
     # Found event_text, use it and return result
     try:
+        print(type(embed))
         res = process_input_list(embed, best_of)
         result['statusCode'] = 200
         result['body']['msg'] = str(res)
@@ -192,8 +199,7 @@ def handler(event, context):
             result['body']['best_url'] = best_url
     except:
         result['statusCode'] = 500
-        result['body']['warnings'].append(
-            "Error occurred while processing input text!")
+        result['body'] = {'msg': 'Error occurred while processing input text!'}
         result['headers']['Content-Type'] = "application/json"
         
     return json.dumps(result)
