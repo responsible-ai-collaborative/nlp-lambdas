@@ -15,6 +15,12 @@ jobs:
         with:
           submodules: 'recursive'
           lfs: 'true'
+            
+      - name: Get CWD
+        run: cwd
+
+      - name: Install and use tree to list files
+        run: sudo apt-get install tree && tree
 
       # Source: https://stackoverflow.com/a/62639424
       - name: Use cached venv
@@ -111,9 +117,6 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: 'us-west-2'      
-
-      - name: Install and use tree to list files
-        run: sudo apt-get install tree && tree
 
       - name: cdk deploy
         run: . ./.venv/bin/activate && cdk deploy --require-approval never

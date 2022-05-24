@@ -17,6 +17,12 @@ jobs:
           submodules: 'recursive'
           lfs: 'true'
 
+      - name: Get CWD
+        run: cwd
+              
+      - name: Install and use tree to list files
+        run: sudo apt-get install tree && tree
+
       # Source: https://stackoverflow.com/a/62639424
       # Key cache by requirements.txt files
       - name: Use cached venv
@@ -101,9 +107,6 @@ jobs:
       - name: Build project for SAM testing
         # if: steps.cache-sam-build.outputs.cache-hit != 'true'
         run: . ./.venv/bin/activate && sam build -t ./cdk.out/AiidNlpLambdaStack.template.json --cached
-        
-      - name: Install and use tree to list files
-        run: sudo apt-get install tree && tree
 
       - name: Locally test Lambdas and API
         run: . ./.venv/bin/activate && python -m pytest
