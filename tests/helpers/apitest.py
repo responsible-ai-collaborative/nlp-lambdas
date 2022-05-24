@@ -11,8 +11,6 @@ import atexit
 
 from .custom_exceptions import (StartApiTimeoutException)
 
-# TODO: refactor to use helpers rather than repeating code
-
 start_api_timeout = 60
 request_timeout = 180
 api_running = False
@@ -43,7 +41,7 @@ def cleanup():
     p_list = []
     api_running = False
 
-def run_text_to_db_similar_api_tests(expectIncident, docsJsonPath):
+def run_api_tests(expectIncident, docsJsonPath, payloadKey='text', route='/text-to-db-similar'):
     # register global
     global p_list
     global api_running
@@ -61,42 +59,9 @@ def run_text_to_db_similar_api_tests(expectIncident, docsJsonPath):
         if api_running:
             # Open the provided json input and run a get and post request
             with open(docsJsonPath, encoding="utf-8") as json_file:
-                res_get = run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-to-db-similar")
+                res_get = run_get_test_fd(expectIncident, json_file, payloadKey, route)
                 json_file.seek(0)
-                res_post = run_post_test_fd(expectIncident, json_file, route="/text-to-db-similar")
-    except Exception as e:
-        api_running = False
-        cleanup()
-        raise e
-
-    if p:
-        kill(p.pid)
-        out, err = p.communicate()
-        api_running = False
-
-    return(res_get == res_post == True)
-
-def run_embed_to_db_similar_api_tests(expectIncident, docsJsonPath):
-    # register global
-    global p_list
-    global api_running
-
-    # start the api
-    p = start_api()
-    p_list.append(p)
-
-    # initial, failing values
-    res_get = -1
-    res_post = -2
-
-    # try to make test requests
-    try:
-        if api_running:
-            # Open the provided json input and run a get and post request
-            with open(docsJsonPath, encoding="utf-8") as json_file:
-                res_get = run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/embed-to-db-similar")
-                json_file.seek(0)
-                res_post = run_post_test_fd(expectIncident, json_file, route="/embed-to-db-similar")
+                res_post = run_post_test_fd(expectIncident, json_file, route)
     except Exception as e:
         api_running = False
         cleanup()
