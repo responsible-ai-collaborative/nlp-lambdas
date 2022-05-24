@@ -110,9 +110,8 @@ def run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-t
     json_payload = json.load(json_file)
     get_payload = json_payload[payloadKey]
     get_url = (f'http://127.0.0.1:3000{route}?{payloadKey}=\\"{get_payload}\\"')
-    # get_url_shortened = get_url if len(get_url)<100 else f'{get_url[:90]} ... {get_url[90:100]}'
-    # print(f"before request, req_url = {get_url_shortened}")
-    print(f"before request")
+    get_url_shortened = get_url if len(get_url)<100 else f'{get_url[:90]} ... {get_url[90:100]}'
+    print(f"before request, req_url = {get_url_shortened}")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")
     print(res.json())

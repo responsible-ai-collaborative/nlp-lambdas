@@ -164,29 +164,30 @@ def handler(event, context):
         result['body']['warnings'].append(
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
-    # Handle unicode in event_text and parse it to a list
+    # Parse provided input!
+    # embed:list = literal_eval(unidecode(embed_text))
     try:
+        # Handle unicode in event_text and parse it to a list
         embed:list = literal_eval(unidecode(embed_text))
+
+        # Found event_text, use it and return result
+        try:
+            res = process_input_list(embed, best_of)
+            result['statusCode'] = 200
+            result['body']['msg'] = str(res)
+            result['headers']['Content-Type'] = "application/json"
+            if (res != None and len(res) > 0):
+                best_score, best_idx = res[0]
+                best_url = f'https://incidentdatabase.ai/apps/discover?display=details&incident_id={best_idx}'
+                result['body']['best_url'] = best_url
+        except:
+            result['statusCode'] = 500
+            result['body']['warnings'].append(
+                "Error occurred while processing input text!")
+            result['headers']['Content-Type'] = "application/json"
     except:
         result['statusCode'] = 500
         result['body'] = {'msg': 'Error during literal evaluation of embed_text!'}
-        result['headers']['Content-Type'] = "application/json"
-        return json.dumps(result)
-
-    # Found event_text, use it and return result
-    try:
-        res = process_input_list(embed, best_of)
-        result['statusCode'] = 200
-        result['body']['msg'] = str(res)
-        result['headers']['Content-Type'] = "application/json"
-        if (res != None and len(res) > 0):
-            best_score, best_idx = res[0]
-            best_url = f'https://incidentdatabase.ai/apps/discover?display=details&incident_id={best_idx}'
-            result['body']['best_url'] = best_url
-    except:
-        result['statusCode'] = 500
-        result['body']['warnings'].append(
-            "Error occurred while processing input text!")
         result['headers']['Content-Type'] = "application/json"
         
     return json.dumps(result)
