@@ -110,7 +110,7 @@ def run_get_test_fd(expectIncident, json_file, payloadKey="text", route="/text-t
     json_payload = json.load(json_file)
     get_payload = json_payload[payloadKey]
     get_url = (f'http://127.0.0.1:3000{route}?{payloadKey}=\\"{get_payload}\\"')
-    print("before request")
+    print(f"before request, req_url = {get_url}")
     res = requests.get(get_url, timeout=request_timeout)
     print(f"after request, res = {res}")
     print(res.json())
@@ -147,7 +147,7 @@ def main():
     args = parser.parse_args()
 
     if args.ExpectIncidentNumber and args.DocsJson:
-        sys.exit(not run_text_to_db_similar_api_tests(args.ExpectIncidentNumber, args.DocsJson))
+        sys.exit(not run_api_tests(args.ExpectIncidentNumber, args.DocsJson))
 
 
 if __name__ == "__main__":
