@@ -10,19 +10,56 @@ from unidecode import unidecode
 import pandas as pd
 from typing import Union
 
+
+def list_files(startpath):
+    res = ""
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        res = res + ('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            res = res + ('{}{}'.format(subindent, f))
+    return res
+
+# # Get model and tokenizer from EFS or download it to EFS
+# model_path = os.path.join(
+#     os.environ["TRANSFORMERS_CACHE"], os.environ['MODEL_DIR'], os.environ["MODEL_FILENAME"])
+# model_dir = os.path.join(
+#     os.environ["TRANSFORMERS_CACHE"], os.environ['MODEL_DIR'])
+# hf_uri = os.environ["HF_MODEL_URI"]
+
+# # If it exists in the EFS, load from EFS
+# if os.path.isfile(model_path):
+#     tokenizer = LongformerTokenizer.from_pretrained(hf_uri)
+#     model = LongformerModel.from_pretrained(hf_uri)
+#     tokenizer.save_pretrained(model_dir)
+#     model.save_pretrained(model_dir)
+# # Else, not saved into EFS yet, get from hf and save
+# else:
+#     tokenizer = LongformerTokenizer.from_pretrained(
+#         model_dir, local_files_only=True)
+#     model = LongformerModel.from_pretrained(model_dir, local_files_only=True)
+
+
+# # Constants
+# incidents_path = os.path.join(
+#     os.environ["TRANSFORMERS_CACHE"], os.environ["INCIDENTS_FILENAME"])
+# csv_path = os.path.join(
+#     os.environ["TRANSFORMERS_CACHE"], os.environ["CSV_FILENAME"])
 model = LongformerModel.from_pretrained(
-    './inference/model', local_files_only=True)
+    '/function/model', local_files_only=True)
 tokenizer = LongformerTokenizer.from_pretrained(
-    './inference/model', local_files_only=True)
-csv_path = './inference/db_state/incidents.csv'
-incidents_path = './inference/db_state/state.csv'
+    '/function/model', local_files_only=True)
+csv_path = '/function/db_state/incidents.csv'
+incidents_path = '/function/db_state/state.csv'
 best_of_def = 3
 
 # Load in a list of incident states from a CSV
 state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
 
 # Get longformer embedding
-def get_embedding(text:str):
+def get_embedding(text: str):
     inp = tokenizer(text,
                     padding="longest",
                     truncation="longest_first",
@@ -31,29 +68,20 @@ def get_embedding(text:str):
 
 # Compute cosine similarity between two tensors
 # Returns a single value of the cosine_sim
-def compute_cosine_sim_e_e(embed_1: Union[torch.Tensor,list], embed_2: Union[torch.Tensor,list]):
+def compute_cosine_sim_e_e(embed_1: Union[torch.Tensor, list], embed_2: Union[torch.Tensor, list]):
     embed_1 = embed_1 if type(embed_1) == torch.Tensor else torch.tensor(embed_1)
     embed_2 = embed_2 if type(embed_2) == torch.Tensor else torch.tensor(embed_2)
     return torch.nn.functional.cosine_similarity(embed_1, embed_2, dim=-1)
 
 # Compute cosine similarity between a tensor and all embeddings in a db state DataFrame
 # Returns a list of tuples (cosine_sim, incident_id) for each incident in dataframe
-def compute_cosine_sim_e_df(embed: Union[torch.Tensor,list], dataframe: pd.DataFrame):
+def compute_cosine_sim_e_df(embed: Union[torch.Tensor, list], dataframe: pd.DataFrame):
     embed = embed if type(embed) == torch.Tensor else torch.tensor(embed)
     return [(
-                compute_cosine_sim_e_e(embed, torch.tensor(dataframe.loc[i, "mean"])).item(),
-                dataframe.loc[i, "incident_id"]
-            ) for i in range(len(state))]
-
-# Process input text for text-to-db-similar computation
-# Returns a list of the most N (best_of) similar incidents with scores and IDs
-def process_input_text(text: str, best_of: int = best_of_def):
-    embed = get_embedding(text)
-    cosine_sims = sorted(compute_cosine_sim_e_df(embed, state), reverse=True)
-    if (best_of >= 0):
-        return cosine_sims[:best_of]
-    else:
-        return cosine_sims
+        compute_cosine_sim_e_e(embed, torch.tensor(
+            dataframe.loc[i, "mean"])).item(),
+        dataframe.loc[i, "incident_id"]
+    ) for i in range(len(state))]
 
 # Process input text for text-to-db-similar computation
 # Returns a list of the most N (best_of) similar incidents with scores and IDs
@@ -64,8 +92,35 @@ def process_input_list(embed: list, best_of: int = best_of_def):
     else:
         return cosine_sims
 
+# Old code that above functions replicate
+# def test(text):
+#     inp = tokenizer(text,
+#                     padding="longest",
+#                     truncation="longest_first",
+#                     return_tensors="pt")
+#     out = model(**inp)
+#     sims = [(torch.nn.functional.cosine_similarity(
+#                  out.last_hidden_state[0][0],
+#                  torch.tensor(state.loc[i,"mean"]),
+#                  dim=-1).item(),
+#              state.loc[i,"incident_id"]) for i in range(len(state))]
+#     return sims
+#
+# def inputted(whole_text, best_of=best_of_def):
+#     sims = [j for j in sorted(test(whole_text), reverse=True)]
+#     if (best_of >= 0):
+#         return sims[:best_of]
+#     else:
+#         return sims
+#
+# # What to do to correctly formatted input event_text
+# def process(event_text, best_of=best_of_def):
+#     # return tokenizer(event_text)
+#     return inputted(event_text, best_of)
+
+
 # Define lambda handler
-def embed_to_db_similar_handler(event, context):
+def handler(event, context):
     # Starting point for response formatting
     result = {
         "isBase64Encoded": False,
@@ -110,7 +165,7 @@ def embed_to_db_similar_handler(event, context):
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
     # Handle unicode in event_text and parse it to a list
-    embed: list = literal_eval(unidecode(embed_text))
+    embed:list = literal_eval(unidecode(embed_text))
 
     # Found event_text, use it and return result
     try:
@@ -127,28 +182,24 @@ def embed_to_db_similar_handler(event, context):
         result['body']['warnings'].append(
             "Error occurred while processing input text!")
         result['headers']['Content-Type'] = "application/json"
-
     return json.dumps(result)
 
+    # # Python 3.10 required for this nicer match formatting (not updated w/ proxy integration)
+    # # Get input from body or query string
+    # match event:
+    #     # If an expected format
+    #     case {'text': event_text} \
+    #             | {'body': {'text': event_text}} \
+    #             | {'queryStringParameters': {'text': event_text}}:
+    #         result['statusCode'] = 200
+    #         # result['body'] = nlp(event_text)[0]
+    #         result['body'] = inputted(event_text)
+    #         result['headers']['Content-Type'] = "application/json"
+    #         return result
+    #     # Else if input not given, return error
+    #     case _:
+    #         result['statusCode'] = 500
+    #         result['body'] = "Error! Valid input text not provided!"
+    #         result['headers']['Content-Type'] = "application/json"
+    #         return result
 
-
-
-
-event_text = ""
-incident = 1
-with open(f"./tests/unit/testing_materials/lambda_test_request_incident_{incident}.json", "r", encoding="utf-8") as text_json_fp:
-    text_json = json.load(text_json_fp)
-    text = text_json["text"]
-    event_text = unidecode(text[:6000])
-
-embed = get_embedding(event_text)
-json_out = {"embed":str(embed.detach().tolist())}
-
-# with open(f"./tests/unit/testing_materials/lambda_test_request_incident_{incident}_embedding.json", "w") as json_file:
-#     json.dump(json_out, json_file)
-
-print(compute_cosine_sim_e_e(embed, torch.tensor(literal_eval(json_out["embed"]))))
-
-
-# with open("tests/unit/testing_materials/lambda_test_request_incident_1_embedding.json", "r") as json_fp:
-#     print(embed_to_db_similar_handler(json.load(json_fp), None))
