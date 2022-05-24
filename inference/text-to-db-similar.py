@@ -65,12 +65,15 @@ def get_embedding(text:str):
 
 # Compute cosine similarity between two tensors
 # Returns a single value of the cosine_sim
-def compute_cosine_sim_e_e(embed_1: torch.Tensor, embed_2: torch.Tensor):
+def compute_cosine_sim_e_e(embed_1: torch.Tensor|list, embed_2: torch.Tensor|list):
+    embed_1 = embed_1 if type(embed_1) == torch.Tensor else torch.tensor(embed_1) 
+    embed_2 = embed_2 if type(embed_2) == torch.Tensor else torch.tensor(embed_2) 
     return torch.nn.functional.cosine_similarity(embed_1, embed_2, dim=-1)
 
 # Compute cosine similarity between a tensor and all embeddings in a db state DataFrame
 # Returns a list of tuples (cosine_sim, incident_id) for each incident in dataframe
-def compute_cosine_sim_e_df(embed: torch.Tensor, dataframe: pd.DataFrame):
+def compute_cosine_sim_e_df(embed: torch.Tensor|list, dataframe: pd.DataFrame):
+    embed = embed if type(embed) == torch.Tensor else torch.tensor(embed) 
     return [(\
                 compute_cosine_sim_e_e(embed, torch.tensor(dataframe.loc[i, "mean"])).item(),\
                 dataframe.loc[i, "incident_id"]\
