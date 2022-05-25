@@ -42,20 +42,21 @@ def list_files(startpath):
 #     model = LongformerModel.from_pretrained(model_dir, local_files_only=True)
 
 # # Constants
-# incidents_path = os.path.join(
+# STATE_DOC = os.path.join(
 #     os.environ["TRANSFORMERS_CACHE"], os.environ["INCIDENTS_FILENAME"])
 # csv_path = os.path.join(
 #     os.environ["TRANSFORMERS_CACHE"], os.environ["CSV_FILENAME"])
-model = LongformerModel.from_pretrained(
-    '/function/model', local_files_only=True)
-tokenizer = LongformerTokenizer.from_pretrained(
-    '/function/model', local_files_only=True)
-csv_path = '/function/db_state/incidents.csv'
-incidents_path = '/function/db_state/state.csv'
-best_of_def = 3
 
+
+STATE_DOC = '/function/db_state/state.csv'
+BEST_OF = 3
+tokenizer = LongformerTokenizer.from_pretrained('/function/model',
+                                                local_files_only=True,
+                                                model_max_length=4096)
+model = LongformerModel.from_pretrained('/function/model',
+                                        local_files_only=True)
 # Load in a list of incident states from a CSV
-state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
+state = pd.read_csv(STATE_DOC, converters={"mean": literal_eval})
 
 
 def test(text):
@@ -72,7 +73,7 @@ def test(text):
     return sims
 
 
-def inputted(whole_text, best_of=best_of_def):
+def inputted(whole_text, best_of=BEST_OF):
     sims = [j for j in sorted(test(whole_text), reverse=True)]
     if (best_of >= 0):
         return sims[:best_of]
@@ -81,7 +82,7 @@ def inputted(whole_text, best_of=best_of_def):
 
 
 # What to do to correctly formatted input event_text
-def process(event_text, best_of=best_of_def):
+def process(event_text, best_of=BEST_OF):
     # return tokenizer(event_text)
     return inputted(event_text, best_of)
 
@@ -112,7 +113,7 @@ def handler(event, context):
         # return result
 
     # Get "best of" value from body or query string (or <0 for full list)
-    best_of = best_of_def
+    best_of = BEST_OF
     if ('num' in event):
         best_of = event['num']
     elif ('body' in event and event['body'] != '' and 'num' in json.loads(event['body'])):
@@ -122,18 +123,18 @@ def handler(event, context):
 
     # Assign to best of if possible
     try:
-        if (best_of != best_of_def):  # if input found (type/value mismatch)
+        if (best_of != BEST_OF):  # if input found (type/value mismatch)
             best_of = int(best_of)
     except ValueError:
-        best_of = best_of_def
+        best_of = BEST_OF
         result['body']['warnings'].append(
-            f'Provided value for "num" invalid, using default of {best_of_def}.')
+            f'Provided value for "num" invalid, using default of {BEST_OF}.')
     if (best_of == 0):
         result['body']['warnings'].append(
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
     # Handle unicode in event_text
-    event_text = unidecode(event_text[:6000])
+    event_text = unidecode(event_text)
 
     # Found event_text, use it and return result
     try:
