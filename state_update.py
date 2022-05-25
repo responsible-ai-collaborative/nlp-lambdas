@@ -18,7 +18,7 @@ MODEL_PATH = path.join('inference', 'model')
 # Get the Longformer tokenizer and model
 tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH,
                                                 local_files_only=True,
-                                                model_max_length=4096)
+                                                model_max_length=2000)
 model = LongformerModel.from_pretrained(MODEL_PATH, local_files_only=True)
 
 

@@ -52,7 +52,7 @@ STATE_DOC = '/function/db_state/state.csv'
 BEST_OF = 3
 tokenizer = LongformerTokenizer.from_pretrained('/function/model',
                                                 local_files_only=True,
-                                                model_max_length=4096)
+                                                model_max_length=2000)
 model = LongformerModel.from_pretrained('/function/model',
                                         local_files_only=True)
 # Load in a list of incident states from a CSV
