@@ -69,10 +69,10 @@ jobs:
       - name: Install pytest (add to dependencies later maybe)
         run: . ./.venv/bin/activate && pip install pytest pytest-dotenv
 
-      # - name: Try to update DB State for this test
-      #   run: . ./.venv/bin/activate && python ./state_update.py
-      #   env:
-      #     MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
+      - name: Try to update DB State for this test
+        run: . ./.venv/bin/activate && python ./state_update.py
+        env:
+          MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         
       - name: cdk synth
         run: . ./.venv/bin/activate && cdk synth
