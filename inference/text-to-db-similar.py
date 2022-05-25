@@ -10,51 +10,19 @@ from unidecode import unidecode
 import pandas as pd
 from typing import Union
 
-def list_files(startpath):
-    res = ""
-    for root, dirs, files in os.walk(startpath):
-        level = root.replace(startpath, '').count(os.sep)
-        indent = ' ' * 4 * (level)
-        res = res + ('{}{}/'.format(indent, os.path.basename(root)))
-        subindent = ' ' * 4 * (level + 1)
-        for f in files:
-            res = res + ('{}{}'.format(subindent, f))
-    return res
+# Global vars
+BEST_OF = 3
+STATE_DOC = '/function/db_state/state.csv'
 
-# # Get model and tokenizer from EFS or download it to EFS
-# model_path = os.path.join(
-#     os.environ["TRANSFORMERS_CACHE"], os.environ['MODEL_DIR'], os.environ["MODEL_FILENAME"])
-# model_dir = os.path.join(
-#     os.environ["TRANSFORMERS_CACHE"], os.environ['MODEL_DIR'])
-# hf_uri = os.environ["HF_MODEL_URI"]
-
-# # If it exists in the EFS, load from EFS
-# if os.path.isfile(model_path):
-#     tokenizer = LongformerTokenizer.from_pretrained(hf_uri)
-#     model = LongformerModel.from_pretrained(hf_uri)
-#     tokenizer.save_pretrained(model_dir)
-#     model.save_pretrained(model_dir)
-# # Else, not saved into EFS yet, get from hf and save
-# else:
-#     tokenizer = LongformerTokenizer.from_pretrained(
-#         model_dir, local_files_only=True)
-#     model = LongformerModel.from_pretrained(model_dir, local_files_only=True)
-
-# # Constants
-# incidents_path = os.path.join(
-#     os.environ["TRANSFORMERS_CACHE"], os.environ["INCIDENTS_FILENAME"])
-# csv_path = os.path.join(
-#     os.environ["TRANSFORMERS_CACHE"], os.environ["CSV_FILENAME"])
-model = LongformerModel.from_pretrained(\
-    '/function/model', local_files_only=True)
-tokenizer = LongformerTokenizer.from_pretrained(\
-    '/function/model', local_files_only=True)
-csv_path = '/function/db_state/incidents.csv'
-incidents_path = '/function/db_state/state.csv'
-best_of_def = 3
+# Load tokenizer and model from local, pretrained model files
+tokenizer = LongformerTokenizer.from_pretrained('/function/model',
+                                                local_files_only=True,
+                                                model_max_length=2000)
+model = LongformerModel.from_pretrained('/function/model',
+                                        local_files_only=True)
 
 # Load in a list of incident states from a CSV
-state = pd.read_csv(incidents_path, converters={"mean": literal_eval})
+state = pd.read_csv(STATE_DOC, converters={"mean": literal_eval})
 
 # Get longformer embedding
 def get_embedding(text:str):
@@ -82,13 +50,14 @@ def compute_cosine_sim_e_df(embed: Union[torch.Tensor, list], dataframe: pd.Data
 
 # Process input text for text-to-db-similar computation
 # Returns a list of the most N (best_of) similar incidents with scores and IDs
-def process_input_text(text: str, best_of: int = best_of_def):
+def process_input_text(text: str, best_of: int = BEST_OF):
     embed = get_embedding(text)
     cosine_sims = sorted(compute_cosine_sim_e_df(embed, state), reverse=True)
     if (best_of >= 0):
         return cosine_sims[:best_of]
     else:
         return cosine_sims
+
 
 # Old code that above functions replicate
 # def test(text):
@@ -104,7 +73,7 @@ def process_input_text(text: str, best_of: int = best_of_def):
 #              state.loc[i,"incident_id"]) for i in range(len(state))]
 #     return sims
 # 
-# def inputted(whole_text, best_of=best_of_def):
+# def inputted(whole_text, best_of=BEST_OF):
 #     sims = [j for j in sorted(test(whole_text), reverse=True)]
 #     if (best_of >= 0):
 #         return sims[:best_of]
@@ -112,7 +81,7 @@ def process_input_text(text: str, best_of: int = best_of_def):
 #         return sims
 #
 # # What to do to correctly formatted input event_text
-# def process(event_text, best_of=best_of_def):
+# def process(event_text, best_of=BEST_OF):
 #     # return tokenizer(event_text)
 #     return inputted(event_text, best_of)
 
@@ -142,7 +111,7 @@ def handler(event, context):
         return json.dumps(result)
 
     # Get "best of" value from body or query string (or <0 for full list)
-    best_of = best_of_def
+    best_of = BEST_OF
     if ('num' in event):
         best_of = event['num']
     elif ('body' in event and event['body'] != '' and 'num' in json.loads(event['body'])):
@@ -152,18 +121,18 @@ def handler(event, context):
 
     # Assign to best of if possible
     try:
-        if (best_of != best_of_def):  # if input found (type/value mismatch)
+        if (best_of != BEST_OF):  # if input found (type/value mismatch)
             best_of = int(best_of)
     except ValueError:
-        best_of = best_of_def
+        best_of = BEST_OF
         result['body']['warnings'].append(
-            f'Provided value for "num" invalid, using default of {best_of_def}.')
+            f'Provided value for "num" invalid, using default of {BEST_OF}.')
     if (best_of == 0):
         result['body']['warnings'].append(
             f'Zero results requested with the "num" value of 0. Use value <0 for maximum possible.')
 
     # Handle unicode in event_text
-    event_text = unidecode(event_text[:6000])
+    event_text = unidecode(event_text)
 
     # Found event_text, use it and return result
     try:
