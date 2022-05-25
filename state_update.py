@@ -16,7 +16,9 @@ MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
 MODEL_PATH = path.join('inference', 'model')
 
 # Get the Longformer tokenizer and model
-tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
+tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH,
+                                                local_files_only=True,
+                                                model_max_length=2000)
 model = LongformerModel.from_pretrained(MODEL_PATH, local_files_only=True)
 
 
@@ -49,7 +51,7 @@ pipeline = [
         'localField': 'reports',
         'foreignField': 'report_number',
         'pipeline': [
-            {'$project': {'_id': False, 'text': True}}
+            {'$project': {'_id': False, 'text': True, 'report_number': True}}
         ],
         'as': 'reports'
     }}
@@ -58,7 +60,7 @@ results = [result for result in collection.aggregate(pipeline)]
 
 # Update the state using the results
 for result in results:
-    # print('checking', result['incident_id'])
+    print('checking', result['incident_id']) # DEBUG
 
     # Process the first report and store a row for incidents not in the state
     if result['incident_id'] not in state.index:
@@ -66,12 +68,12 @@ for result in results:
         row = DataFrame({'count': [1], 'mean': [token.detach().tolist()]},
                         index=[result['incident_id']])
         state = concat([state, row])
-        # print('added incident')
+        print('added incident') # DEBUG
 
     # Process the text of new reports, and store new mean for each incident
     count = int(state.loc[result['incident_id'], 'count'])
     for report in result['reports'][count:]:
-        # print('adding report, count', count)
+        print('adding report', report['report_number'], 'count', count) # DEBUG
         token = cls_token(report['text'])
         mean = tensor(state.loc[result['incident_id'], 'mean'])
         new = token.add(mean, alpha=count).div(count + 1).detach().tolist()
