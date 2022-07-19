@@ -1,7 +1,10 @@
-# state_update.py - updates (or generates) the adjacent state.csv with the current state of the AIID DB.
-# Requires:     the Longformer submodule is downloaded,
-#               environment variable MONGODB_CONNECTION_STRING set to read the database.
-# Assumes:      being executed from project root directory
+# state_update_db.py - updates (or generates) embeddings for reports and incidents
+#                      and stores them in the database.
+#
+# Requires:            the Longformer submodule is downloaded,
+#                      environment variable MONGODB_CONNECTION_STRING set to read the database.
+#
+# Assumes:             being executed from project root directory
 
 from os import ( environ, path )
 from ast import literal_eval
