@@ -12,9 +12,6 @@ from pandas import read_csv, DataFrame, concat, array
 from pymongo import MongoClient
 from torch import tensor
 from transformers import LongformerTokenizer, LongformerModel
-from argparse import ArgumentParser
-import gc
-import random
 
 MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
 MODEL_PATH = path.join('inference', 'model')
