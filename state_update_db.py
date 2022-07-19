@@ -14,6 +14,7 @@ from pandas import read_csv, DataFrame, concat, array
 from pymongo import MongoClient
 from torch import tensor
 from transformers import LongformerTokenizer, LongformerModel
+from hashlib import sha1
 
 MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
 MODEL_PATH = path.join('inference', 'model')
@@ -80,7 +81,7 @@ for i, incident in enumerate(db.incidents.aggregate(pipeline)):
     # and reports where the text has changed
     for report in incident['reports']:
         print('checking report', report['report_number'])
-        text_hash = report['text'][0:20] # TODO: Use a better hash function
+        text_hash = sha1(report['text'].encode('utf-8')).hexdigest()
         if not (
             report.get('embedding') and 
             report['embedding']['from_text_hash'] == text_hash
@@ -103,11 +104,13 @@ for i, incident in enumerate(db.incidents.aggregate(pipeline)):
     if new_report_embedding:
         count = 1
         for report in incident['reports'][1:]:
-            mean = tensor(report['embedding']['vector'])
-                       .add(tensor(mean), alpha=count)
-                       .div(count + 1)
-                       .detach()
-                       .tolist()
+            mean = (
+                tensor(report['embedding']['vector'])
+                  .add(tensor(mean), alpha=count)
+                  .div(count + 1)
+                  .detach()
+                  .tolist()
+            )
             count += 1
 
     report_ids = [r['report_number'] for r in incident['reports']]
