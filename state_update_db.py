@@ -1,10 +1,12 @@
-# state_update_db.py - updates (or generates) embeddings for reports and incidents
+# state_update_db.py - updates (or generates) embeddings
+#                      for reports and incidents
 #                      and stores them in the database.
 #
-# Requires:            the Longformer submodule is downloaded,
-#                      environment variable MONGODB_CONNECTION_STRING set to read the database.
+# Requires:          - the Longformer submodule is downloaded,
+#                    - environment variable MONGODB_CONNECTION_STRING 
+#                      set to read the database.
 #
-# Assumes:             being executed from project root directory
+# Assumes:           - being executed from project root directory
 
 from os import ( environ, path )
 from ast import literal_eval
@@ -17,10 +19,16 @@ MONGODB_URI = environ['MONGODB_CONNECTION_STRING']
 MODEL_PATH = path.join('inference', 'model')
 
 # Get the Longformer tokenizer and model
-tokenizer = LongformerTokenizer.from_pretrained(MODEL_PATH,
-                                                local_files_only=True,
-                                                model_max_length=2000)
-model = LongformerModel.from_pretrained(MODEL_PATH, local_files_only=True)
+tokenizer = LongformerTokenizer.from_pretrained(
+    MODEL_PATH,
+    local_files_only=True,
+    model_max_length=2000
+)
+
+model = LongformerModel.from_pretrained(
+    MODEL_PATH,
+    local_files_only=True
+)
 
 
 # Process the text of one report and return the CLS token
@@ -32,30 +40,28 @@ def cls_token(text):
     return model(**inp).last_hidden_state[0][0]
 
 
-# Aggregate the incident_id and text of all reports from Mongo for each incident
+# Aggregate the incident_id and text 
+# of all reports from Mongo for each incident
 client = MongoClient(MONGODB_URI)
 db = client['aiidprod']
 pipeline = [
-    { 
-        '$project': {
+    {   '$project': {
           '_id': False, 
           'incident_id': True, 
           'reports': True, 
           'embedding': True
         }
     },
-    {
-        '$lookup': {
+    {   '$lookup': {
             'from': 'reports',
             'localField': 'reports',
             'foreignField': 'report_number',
             'pipeline': [
-                {
-                    '$project': {
-                      '_id': False,
-                      'text': True,
-                      'report_number': True, 
-                      'embedding': True
+                {   '$project': {
+                        '_id': False,
+                        'text': True,
+                        'report_number': True, 
+                        'embedding': True
                     }
                 }
             ],
