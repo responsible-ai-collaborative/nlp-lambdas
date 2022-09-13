@@ -1,0 +1,29 @@
+name: 'Embedding Update'
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    name: 'Embedding Update'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone the repository
+        run: git clone https://github.com/responsible-ai-collaborative/nlp-lambdas.git
+
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt -r requirements-dev.txt
+        working-directory: ./nlp-lambdas
+
+      - name: Install language model
+        run: git submodule update --init --recursive
+        working-directory: ./nlp-lambdas
+
+      - name: state_update_db.py
+        run: python3 state_update_db.py
+        working-directory: ./nlp-lambdas
+        env:
+          MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
